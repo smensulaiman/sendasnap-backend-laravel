@@ -1,0 +1,11 @@
+{
+    "mcpServers": {
+        "laravel-boost": {
+            "command": "C:\\Users\\sulai\\.config\\herd\\bin\\php82\\php.exe",
+            "args": [
+                "C:\\Users\\sulai\\Herd\\sendasnap-backend-laravel\\artisan",
+                "boost:mcp"
+            ]
+        }
+    }
+}

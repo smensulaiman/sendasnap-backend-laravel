@@ -1,0 +1,293 @@
+<?php
+
+namespace App\Http\Controllers\Api\V1;
+
+use App\Http\Controllers\Controller;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
+
+/**
+ * @OA\Tag(
+ *     name="Authentication",
+ *     description="API endpoints for user authentication"
+ * )
+ */
+class AuthController extends Controller
+{
+    /**
+     * @OA\Post(
+     *     path="/api/v1/auth/register",
+     *     summary="Register a new user",
+     *     description="Create a new user account",
+     *     tags={"Authentication"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"name","email","password","password_confirmation"},
+     *             @OA\Property(property="name", type="string", example="John Doe"),
+     *             @OA\Property(property="email", type="string", format="email", example="john@example.com"),
+     *             @OA\Property(property="password", type="string", format="password", example="password123"),
+     *             @OA\Property(property="password_confirmation", type="string", format="password", example="password123"),
+     *             @OA\Property(property="role", type="string", enum={"admin","manager","employee","client"}, example="client"),
+     *             @OA\Property(property="phone", type="string", example="+1234567890")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="User registered successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="User registered successfully"),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="user", type="object"),
+     *                 @OA\Property(property="token", type="string", example="1|abc123...")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Validation failed"),
+     *             @OA\Property(property="errors", type="object")
+     *         )
+     *     )
+     * )
+     */
+    public function register(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8|confirmed',
+            'role' => 'sometimes|in:admin,manager,employee,client',
+            'phone' => 'nullable|string|max:20',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->errorResponse('Validation failed', $validator->errors(), 422);
+        }
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role' => $request->role ?? 'client',
+            'phone' => $request->phone,
+        ]);
+
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return $this->successResponse('User registered successfully', [
+            'user' => $user,
+            'token' => $token,
+        ]);
+    }
+
+    /**
+     * Login user
+     */
+    public function login(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->errorResponse('Validation failed', $validator->errors(), 422);
+        }
+
+        if (!Auth::attempt($request->only('email', 'password'))) {
+            return $this->errorResponse('Invalid credentials', [], 401);
+        }
+
+        $user = Auth::user();
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return $this->successResponse('Login successful', [
+            'user' => $user,
+            'token' => $token,
+        ]);
+    }
+
+    /**
+     * Logout user
+     */
+    public function logout(Request $request): JsonResponse
+    {
+        $request->user()->currentAccessToken()->delete();
+
+        return $this->successResponse('Logout successful');
+    }
+
+    /**
+     * Refresh token
+     */
+    public function refresh(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $user->currentAccessToken()->delete();
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return $this->successResponse('Token refreshed successfully', [
+            'token' => $token,
+        ]);
+    }
+
+    /**
+     * Get authenticated user
+     */
+    public function me(Request $request): JsonResponse
+    {
+        return $this->successResponse('User retrieved successfully', [
+            'user' => $request->user(),
+        ]);
+    }
+
+    /**
+     * Update user profile
+     */
+    public function updateProfile(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'sometimes|string|max:255',
+            'phone' => 'nullable|string|max:20',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->errorResponse('Validation failed', $validator->errors(), 422);
+        }
+
+        $user = $request->user();
+
+        if ($request->hasFile('avatar')) {
+            $avatarPath = $request->file('avatar')->store('avatars', 'public');
+            $user->avatar = $avatarPath;
+        }
+
+        $user->update($request->only(['name', 'phone']));
+
+        return $this->successResponse('Profile updated successfully', [
+            'user' => $user,
+        ]);
+    }
+
+    /**
+     * Change password
+     */
+    public function changePassword(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'current_password' => 'required',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->errorResponse('Validation failed', $validator->errors(), 422);
+        }
+
+        $user = $request->user();
+
+        if (!Hash::check($request->current_password, $user->password)) {
+            return $this->errorResponse('Current password is incorrect', [], 400);
+        }
+
+        $user->update([
+            'password' => Hash::make($request->password),
+        ]);
+
+        return $this->successResponse('Password changed successfully');
+    }
+
+    /**
+     * Send password reset link
+     */
+    public function forgotPassword(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->errorResponse('Validation failed', $validator->errors(), 422);
+        }
+
+        $status = Password::sendResetLink($request->only('email'));
+
+        if ($status === Password::RESET_LINK_SENT) {
+            return $this->successResponse('Password reset link sent to your email');
+        }
+
+        return $this->errorResponse('Unable to send password reset link', [], 400);
+    }
+
+    /**
+     * Reset password
+     */
+    public function resetPassword(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'token' => 'required',
+            'email' => 'required|email',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->errorResponse('Validation failed', $validator->errors(), 422);
+        }
+
+        $status = Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function ($user, $password) {
+                $user->forceFill([
+                    'password' => Hash::make($password),
+                ])->save();
+            }
+        );
+
+        if ($status === Password::PASSWORD_RESET) {
+            return $this->successResponse('Password reset successfully');
+        }
+
+        return $this->errorResponse('Unable to reset password', [], 400);
+    }
+
+    /**
+     * Success response helper
+     */
+    private function successResponse(string $message, array $data = [], int $status = 200): JsonResponse
+    {
+        return response()->json([
+            'success' => true,
+            'message' => $message,
+            'data' => $data,
+            'meta' => [
+                'timestamp' => now()->toISOString(),
+            ],
+        ], $status);
+    }
+
+    /**
+     * Error response helper
+     */
+    private function errorResponse(string $message, array $errors = [], int $status = 400): JsonResponse
+    {
+        return response()->json([
+            'success' => false,
+            'message' => $message,
+            'errors' => $errors,
+            'meta' => [
+                'timestamp' => now()->toISOString(),
+            ],
+        ], $status);
+    }
+}
