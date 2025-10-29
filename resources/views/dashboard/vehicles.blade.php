@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.dashboard')
 
 @section('title', 'Vehicles')
 
@@ -8,11 +8,11 @@
             <h3>Vehicle Management</h3>
             <div style="display: flex; gap: 12px;">
                 <button class="btn btn-outline" onclick="showFilters()">
-                    <i class="fas fa-filter"></i>
+                    <span class="material-symbols-rounded">filter_list</span>
                     Filters
                 </button>
                 <button class="btn btn-primary" onclick="showAddVehicleModal()">
-                    <i class="fas fa-plus"></i>
+                    <span class="material-symbols-rounded">add</span>
                     Add Vehicle
                 </button>
             </div>
@@ -39,7 +39,7 @@
                                         <div style="display: flex; align-items: center; gap: 12px;">
                                             <div
                                                 style="width: 48px; height: 48px; background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.8)); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white;">
-                                                <i class="fas fa-car"></i>
+                                                <span class="material-symbols-rounded">directions_car</span>
                                             </div>
                                             <div>
                                                 <div style="font-weight: 600; color: hsl(var(--foreground)); font-size: 14px;">
@@ -90,16 +90,16 @@
                                         <div style="display: flex; gap: 4px;">
                                             <button class="btn btn-outline" style="padding: 6px 8px; font-size: 12px;"
                                                 onclick="viewVehicle({{ $vehicle->id }})">
-                                                <i class="fas fa-eye"></i>
+                                                <span class="material-symbols-rounded">visibility</span>
                                             </button>
                                             <button class="btn btn-outline" style="padding: 6px 8px; font-size: 12px;"
                                                 onclick="editVehicle({{ $vehicle->id }})">
-                                                <i class="fas fa-edit"></i>
+                                                <span class="material-symbols-rounded">edit</span>
                                             </button>
                                             <button class="btn btn-outline"
                                                 style="padding: 6px 8px; font-size: 12px; color: #ef4444;"
                                                 onclick="deleteVehicle({{ $vehicle->id }})">
-                                                <i class="fas fa-trash"></i>
+                                                <span class="material-symbols-rounded">delete</span>
                                             </button>
                                         </div>
                                     </td>
@@ -116,12 +116,12 @@
                 <div style="text-align: center; padding: 60px; color: hsl(var(--muted-foreground));">
                     <div
                         style="width: 80px; height: 80px; background: hsl(var(--muted)); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; font-size: 32px;">
-                        <i class="fas fa-car"></i>
+                        <span class="material-symbols-rounded">directions_car</span>
                     </div>
                     <h3 style="margin-bottom: 8px; color: hsl(var(--foreground));">No vehicles found</h3>
                     <p style="margin-bottom: 24px;">Get started by adding your first vehicle to the system.</p>
                     <button class="btn btn-primary" onclick="showAddVehicleModal()">
-                        <i class="fas fa-plus"></i>
+                        <span class="material-symbols-rounded">add</span>
                         Add Vehicle
                     </button>
                 </div>

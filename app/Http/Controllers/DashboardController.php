@@ -30,23 +30,7 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
-        // Get recent tasks
-        $recent_tasks = Task::with(['vehicle', 'assignedUser', 'creator'])
-            ->orderBy('created_at', 'desc')
-            ->limit(5)
-            ->get();
-
-        // Get my tasks if user is not admin
-        $my_tasks = collect();
-        if ($user->role !== 'admin') {
-            $my_tasks = Task::with(['vehicle', 'assignedUser', 'creator'])
-                ->where('assigned_to', $user->id)
-                ->orderBy('created_at', 'desc')
-                ->limit(5)
-                ->get();
-        }
-
-        return view('dashboard.index', compact('stats', 'recent_vehicles', 'recent_tasks', 'my_tasks'));
+        return view('dashboard.index', compact('stats', 'recent_vehicles'));
     }
 
     public function vehicles()
@@ -62,6 +46,30 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
 
+        // Get task statistics
+        $stats = [
+            'total_tasks' => Task::count(),
+            'pending_tasks' => Task::where('status', 'pending')->count(),
+            'completed_tasks' => Task::where('status', 'completed')->count(),
+            'running_tasks' => Task::where('status', 'running')->count(),
+        ];
+
+        // Get recent tasks for the chart
+        $recent_tasks = Task::with(['vehicle', 'assignedUser', 'creator'])
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
+
+        // Get my tasks if user is not admin
+        $my_tasks = collect();
+        if ($user->role !== 'admin') {
+            $my_tasks = Task::with(['vehicle', 'assignedUser', 'creator'])
+                ->where('assigned_to', $user->id)
+                ->orderBy('created_at', 'desc')
+                ->limit(5)
+                ->get();
+        }
+
         if ($user->role === 'admin') {
             $tasks = Task::with(['vehicle', 'assignedUser', 'creator'])
                 ->orderBy('created_at', 'desc')
@@ -73,7 +81,7 @@ class DashboardController extends Controller
                 ->paginate(15);
         }
 
-        return view('dashboard.tasks', compact('tasks'));
+        return view('dashboard.tasks', compact('tasks', 'stats', 'recent_tasks', 'my_tasks'));
     }
 
     public function users()

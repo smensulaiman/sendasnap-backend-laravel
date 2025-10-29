@@ -371,25 +371,25 @@
         <div class="login-left">
             <div class="login-left-content">
                 <h1>
-                    <i class="fas fa-car"></i>
+                    <span class="material-symbols-rounded">directions_car</span>
                     SendaSnap
                 </h1>
                 <p>Vehicle Management System</p>
                 <ul class="features">
                     <li>
-                        <i class="fas fa-check"></i>
+                        <span class="material-symbols-rounded">check</span>
                         Complete vehicle tracking
                     </li>
                     <li>
-                        <i class="fas fa-check"></i>
+                        <span class="material-symbols-rounded">check</span>
                         Task management
                     </li>
                     <li>
-                        <i class="fas fa-check"></i>
+                        <span class="material-symbols-rounded">check</span>
                         Team collaboration
                     </li>
                     <li>
-                        <i class="fas fa-check"></i>
+                        <span class="material-symbols-rounded">check</span>
                         Real-time updates
                     </li>
                 </ul>
@@ -404,7 +404,7 @@
 
             @if($errors->any())
                 <div class="error-message">
-                    <i class="fas fa-exclamation-circle"></i>
+                    <span class="material-symbols-rounded">error</span>
                     {{ $errors->first() }}
                 </div>
             @endif

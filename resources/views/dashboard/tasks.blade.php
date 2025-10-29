@@ -1,18 +1,194 @@
-@extends('layouts.app')
+@extends('layouts.dashboard')
 
 @section('title', 'Tasks')
 
 @section('content')
+    <!-- Task Statistics Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-header">
+                <div>
+                    <div class="stat-value">{{ $stats['total_tasks'] ?? 0 }}</div>
+                    <div class="stat-label">Total Tasks</div>
+                    <div class="stat-change positive">
+                        <span class="material-symbols-rounded">trending_up</span>
+                        +8% from last week
+                    </div>
+                </div>
+                <div class="stat-icon">
+                    <span class="material-symbols-rounded">task_alt</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-header">
+                <div>
+                    <div class="stat-value">{{ $stats['pending_tasks'] ?? 0 }}</div>
+                    <div class="stat-label">Pending Tasks</div>
+                    <div class="stat-change negative">
+                        <span class="material-symbols-rounded">trending_down</span>
+                        -3 from yesterday
+                    </div>
+                </div>
+                <div class="stat-icon">
+                    <span class="material-symbols-rounded">schedule</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-header">
+                <div>
+                    <div class="stat-value">{{ $stats['completed_tasks'] ?? 0 }}</div>
+                    <div class="stat-label">Completed Tasks</div>
+                    <div class="stat-change positive">
+                        <span class="material-symbols-rounded">trending_up</span>
+                        +15% this week
+                    </div>
+                </div>
+                <div class="stat-icon">
+                    <span class="material-symbols-rounded">check_circle</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-header">
+                <div>
+                    <div class="stat-value">{{ $stats['running_tasks'] ?? 0 }}</div>
+                    <div class="stat-label">Running Tasks</div>
+                    <div class="stat-change">
+                        <span class="material-symbols-rounded">remove</span>
+                        No change
+                    </div>
+                </div>
+                <div class="stat-icon">
+                    <span class="material-symbols-rounded">play_circle</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Status Chart and Recent Tasks -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px;">
+        <div class="card">
+            <div class="card-header">
+                <h3>Task Status Distribution</h3>
+            </div>
+            <div class="card-body">
+                <canvas id="taskStatusChart" width="300" height="200"></canvas>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3>Recent Tasks</h3>
+            </div>
+            <div class="card-body">
+                @if(isset($recent_tasks) && $recent_tasks->count() > 0)
+                    <div style="space-y: 12px;">
+                        @foreach($recent_tasks as $task)
+                            <div class="fade-in"
+                                style="padding: 16px; border: 1px solid hsl(var(--border)); border-radius: 8px; margin-bottom: 12px;">
+                                <div
+                                    style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                                    <div style="font-weight: 500; color: hsl(var(--foreground));">{{ $task->title }}</div>
+                                    <span class="badge badge-{{ $task->priority }}">
+                                        {{ ucfirst($task->priority) }}
+                                    </span>
+                                </div>
+                                <div style="font-size: 12px; color: hsl(var(--muted-foreground)); margin-bottom: 8px;">
+                                    {{ Str::limit($task->description, 60) }}
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <div
+                                            style="width: 20px; height: 20px; background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 600;">
+                                            {{ strtoupper(substr($task->assignedUser->name, 0, 1)) }}
+                                        </div>
+                                        <span
+                                            style="font-size: 12px; color: hsl(var(--muted-foreground));">{{ $task->assignedUser->name }}</span>
+                                    </div>
+                                    <span class="badge badge-{{ $task->status }}">
+                                        {{ ucfirst($task->status) }}
+                                    </span>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <div style="text-align: center; padding: 40px; color: hsl(var(--muted-foreground));">
+                        <span class="material-symbols-rounded" style="font-size: 48px; margin-bottom: 16px; opacity: 0.3;">task_alt</span>
+                        <p>No recent tasks found.</p>
+                    </div>
+                @endif
+            </div>
+        </div>
+    </div>
+
+    <!-- My Tasks Section (for non-admin users) -->
+    @if(isset($my_tasks) && $my_tasks->isNotEmpty())
+        <div class="card" style="margin-bottom: 32px;">
+            <div class="card-header">
+                <h3>My Tasks</h3>
+                <span class="badge badge-primary">{{ $my_tasks->count() }} tasks</span>
+            </div>
+            <div class="card-body">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px;">
+                    @foreach($my_tasks as $task)
+                        <div class="fade-in"
+                            style="padding: 20px; border: 1px solid hsl(var(--border)); border-radius: 12px; background: hsl(var(--card));">
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                                <div style="font-weight: 600; color: hsl(var(--foreground)); font-size: 16px;">{{ $task->title }}
+                                </div>
+                                <div style="display: flex; gap: 8px;">
+                                    <span class="badge badge-{{ $task->priority }}">
+                                        {{ ucfirst($task->priority) }}
+                                    </span>
+                                    <span class="badge badge-{{ $task->status }}">
+                                        {{ ucfirst($task->status) }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div style="font-size: 14px; color: hsl(var(--muted-foreground)); margin-bottom: 16px;">
+                                {{ Str::limit($task->description, 100) }}
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                <div style="font-size: 12px; color: hsl(var(--muted-foreground));">
+                                    <span class="material-symbols-rounded">directions_car</span> {{ $task->vehicle->make }} {{ $task->vehicle->model }}
+                                </div>
+                                <div style="font-size: 12px; color: hsl(var(--muted-foreground));">
+                                    <span class="material-symbols-rounded">calendar_month</span>
+                                    {{ $task->due_date ? $task->due_date->format('M d, Y') : 'No due date' }}
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                <button class="btn btn-primary" style="flex: 1; padding: 8px 12px; font-size: 12px;">
+                                    <span class="material-symbols-rounded">visibility</span> View
+                                </button>
+                                <button class="btn btn-outline" style="padding: 8px 12px; font-size: 12px;">
+                                    <span class="material-symbols-rounded">edit</span>
+                                </button>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    @endif
+
     <div class="card">
         <div class="card-header">
             <h3>Task Management</h3>
             <div style="display: flex; gap: 12px;">
                 <button class="btn btn-outline" onclick="showFilters()">
-                    <i class="fas fa-filter"></i>
+                    <span class="material-symbols-rounded">filter_list</span>
                     Filters
                 </button>
                 <button class="btn btn-primary" onclick="showAddTaskModal()">
-                    <i class="fas fa-plus"></i>
+                    <span class="material-symbols-rounded">add</span>
                     Add Task
                 </button>
             </div>
@@ -48,7 +224,7 @@
                                         <div style="display: flex; align-items: center; gap: 8px;">
                                             <div
                                                 style="width: 32px; height: 32px; background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.8)); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px;">
-                                                <i class="fas fa-car"></i>
+                                                <span class="material-symbols-rounded">directions_car</span>
                                             </div>
                                             <div>
                                                 <div style="font-weight: 500; color: hsl(var(--foreground)); font-size: 14px;">
@@ -105,21 +281,21 @@
                                         <div style="display: flex; gap: 4px;">
                                             <button class="btn btn-outline" style="padding: 6px 8px; font-size: 12px;"
                                                 onclick="viewTask({{ $task->id }})">
-                                                <i class="fas fa-eye"></i>
+                                                <span class="material-symbols-rounded">visibility</span>
                                             </button>
                                             <button class="btn btn-outline" style="padding: 6px 8px; font-size: 12px;"
                                                 onclick="editTask({{ $task->id }})">
-                                                <i class="fas fa-edit"></i>
+                                                <span class="material-symbols-rounded">edit</span>
                                             </button>
                                             @if($task->status === 'pending')
                                                 <button class="btn btn-primary" style="padding: 6px 8px; font-size: 12px;"
                                                     onclick="startTask({{ $task->id }})">
-                                                    <i class="fas fa-play"></i>
+                                                    <span class="material-symbols-rounded">play_arrow</span>
                                                 </button>
                                             @elseif($task->status === 'running')
                                                 <button class="btn btn-primary" style="padding: 6px 8px; font-size: 12px;"
                                                     onclick="completeTask({{ $task->id }})">
-                                                    <i class="fas fa-check"></i>
+                                                    <span class="material-symbols-rounded">check</span>
                                                 </button>
                                             @endif
                                         </div>
@@ -137,12 +313,12 @@
                 <div style="text-align: center; padding: 60px; color: hsl(var(--muted-foreground));">
                     <div
                         style="width: 80px; height: 80px; background: hsl(var(--muted)); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; font-size: 32px;">
-                        <i class="fas fa-tasks"></i>
+                        <span class="material-symbols-rounded">task_alt</span>
                     </div>
                     <h3 style="margin-bottom: 8px; color: hsl(var(--foreground));">No tasks found</h3>
                     <p style="margin-bottom: 24px;">Get started by creating your first task.</p>
                     <button class="btn btn-primary" onclick="showAddTaskModal()">
-                        <i class="fas fa-plus"></i>
+                        <span class="material-symbols-rounded">add</span>
                         Add Task
                     </button>
                 </div>
@@ -300,6 +476,48 @@
 
         // Add row hover effects
         document.addEventListener('DOMContentLoaded', function () {
+            // Task Status Chart
+            const taskStatusCtx = document.getElementById('taskStatusChart').getContext('2d');
+            new Chart(taskStatusCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Completed', 'Pending', 'Running', 'Cancelled'],
+                    datasets: [{
+                        data: [{{ $stats['completed_tasks'] ?? 0 }}, {{ $stats['pending_tasks'] ?? 0 }}, {{ ($stats['running_tasks'] ?? 0) }}, 0],
+                        backgroundColor: [
+                            '#10b981',
+                            '#f59e0b',
+                            '#3b82f6',
+                            '#ef4444'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Add click animations to stat cards
+            document.querySelectorAll('.stat-card').forEach(card => {
+                card.addEventListener('click', function () {
+                    this.style.transform = 'scale(0.98)';
+                    setTimeout(() => {
+                        this.style.transform = 'scale(1)';
+                    }, 150);
+                });
+            });
+
             document.querySelectorAll('.table tbody tr').forEach(row => {
                 row.addEventListener('mouseenter', function () {
                     this.style.transform = 'translateX(4px)';
