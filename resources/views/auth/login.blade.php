@@ -11,7 +11,9 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
 
     <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -50,7 +52,7 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Montserrat', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
@@ -409,8 +411,7 @@
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('login') }}" id="loginForm">
-                @csrf
+            <form id="loginForm">
                 <div class="form-group">
                     <label for="email">Email address</label>
                     <input type="email" id="email" name="email" value="{{ old('email') }}"
@@ -439,24 +440,78 @@
             <div class="demo-credentials">
                 <h4>Demo Credentials</h4>
                 <ul>
-                    <li><strong>Admin:</strong> admin@sendasnap.com / password</li>
-                    <li><strong>Manager:</strong> manager@sendasnap.com / password</li>
-                    <li><strong>Employee:</strong> john@sendasnap.com / password</li>
+                    <li><strong>Admin:</strong> sulaiman@sendasnap.com / password</li>
+                    <li><strong>Manager:</strong> acj.shiroyama@gmail.com / password</li>
+                    <li><strong>Employee:</strong> acj.document@gmail.com / password</li>
                 </ul>
             </div>
         </div>
     </div>
 
     <script>
-        // Form submission with loading state
-        document.getElementById('loginForm').addEventListener('submit', function (e) {
+        // REST API login (Sanctum SPA compatible; falls back to token if returned)
+        document.getElementById('loginForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
             const btn = document.getElementById('loginBtn');
             const btnText = document.getElementById('btnText');
             const btnLoading = document.getElementById('btnLoading');
 
-            btn.disabled = true;
-            btnText.style.display = 'none';
-            btnLoading.style.display = 'inline-block';
+            const getCookie = (name) => {
+                const match = document.cookie.match(new RegExp('(?:^|; )' + name.replace(/([.$?*|{}()\[\]\\/+^])/g, '\\$1') + '=([^;]*)'));
+                return match ? decodeURIComponent(match[1]) : null;
+            };
+
+            btn.disabled = true; btnText.style.display = 'none'; btnLoading.style.display = 'inline-block';
+            try {
+                // Token-based API login does NOT require XSRF token
+                const res = await fetch('/api/v1/auth/login', {
+                    method: 'POST',
+                    // No cookies needed for token login
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                const ct = res.headers.get('content-type') || '';
+                const json = ct.includes('application/json') ? await res.json().catch(() => ({})) : {};
+                if (!res.ok) {
+                    // Try to parse plain text error if any
+                    const txt = !ct ? (await res.text().catch(() => '')) : '';
+                    throw new Error(json?.message || txt || 'Invalid credentials');
+                }
+
+                const payload = json?.data ?? json ?? {};
+                const token = payload?.token ?? payload?.access_token ?? payload?.accessToken ?? null;
+
+                if (!token) {
+                    throw new Error('Login response missing access token.');
+                }
+
+                try { localStorage.setItem('api_token', token); } catch (_) {}
+
+                // Bridge to create web session so protected pages work
+                await fetch(@json(route('auth.token-login')), {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ token })
+                });
+
+                const dashUrl = @json(route('dashboard'));
+                try { window.location.replace(dashUrl); } catch (_) { window.location.href = dashUrl; }
+                setTimeout(() => { window.location.href = dashUrl; }, 100);
+            } catch (err) {
+                Swal.fire({ icon: 'error', title: 'Login failed', text: err.message || 'Please try again' });
+                btn.disabled = false; btnText.style.display = 'inline'; btnLoading.style.display = 'none';
+            }
         });
 
         // Auto-fill demo credentials on click
@@ -519,11 +574,11 @@
             mouseX = (e.clientX / window.innerWidth) * 100;
             mouseY = (e.clientY / window.innerHeight) * 100;
 
-            leftSide.style.background = `linear-gradient(135deg, 
-                hsl(var(--primary)) 0%, 
+            leftSide.style.background = `linear-gradient(135deg,
+                hsl(var(--primary)) 0%,
                 hsl(var(--primary) / 0.8) 100%),
-                radial-gradient(circle at ${mouseX}% ${mouseY}%, 
-                rgba(255,255,255,0.1) 0%, 
+                radial-gradient(circle at ${mouseX}% ${mouseY}%,
+                rgba(255,255,255,0.1) 0%,
                 transparent 50%)`;
         });
     </script>

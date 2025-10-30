@@ -2,12 +2,12 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
+use App\Models\ConsigneeDetail;
+use App\Models\Task;
 use App\Models\User;
 use App\Models\Vehicle;
-use App\Models\Task;
-use App\Models\ConsigneeDetail;
 use App\Models\VehiclePhoto;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
@@ -19,8 +19,8 @@ class DatabaseSeeder extends Seeder
     {
         // Create admin user
         $admin = User::create([
-            'name' => 'Admin User',
-            'email' => 'admin@sendasnap.com',
+            'name' => 'Sulaiman',
+            'email' => 'sulaiman@sendasnap.com',
             'password' => Hash::make('password'),
             'role' => 'admin',
             'phone' => '+1234567890',
@@ -28,8 +28,8 @@ class DatabaseSeeder extends Seeder
 
         // Create manager user
         $manager = User::create([
-            'name' => 'Manager User',
-            'email' => 'manager@sendasnap.com',
+            'name' => 'Shiroyama',
+            'email' => 'acj.shiroyama@gmail.com',
             'password' => Hash::make('password'),
             'role' => 'manager',
             'phone' => '+1234567891',
@@ -37,28 +37,19 @@ class DatabaseSeeder extends Seeder
 
         // Create employee users
         $employee1 = User::create([
-            'name' => 'John Doe',
-            'email' => 'john@sendasnap.com',
+            'name' => 'Kasahara',
+            'email' => 'acj.document@gmail.com',
             'password' => Hash::make('password'),
             'role' => 'employee',
             'phone' => '+1234567892',
         ]);
 
         $employee2 = User::create([
-            'name' => 'Jane Smith',
-            'email' => 'jane@sendasnap.com',
+            'name' => 'Akunova Alisa',
+            'email' => 'acjl.infomation@gmail.com',
             'password' => Hash::make('password'),
             'role' => 'employee',
             'phone' => '+1234567893',
-        ]);
-
-        // Create client users
-        $client1 = User::create([
-            'name' => 'Client One',
-            'email' => 'client1@sendasnap.com',
-            'password' => Hash::make('password'),
-            'role' => 'client',
-            'phone' => '+1234567894',
         ]);
 
         // Create sample vehicles
@@ -146,23 +137,23 @@ class DatabaseSeeder extends Seeder
             // Create consignee details for each vehicle
             ConsigneeDetail::create([
                 'vehicle_id' => $vehicle->id,
-                'name' => 'Sample Consignee ' . $vehicle->serial_number,
+                'name' => 'Sample Consignee '.$vehicle->serial_number,
                 'address' => '123 Sample Street, Sample City, Sample Country',
                 'phone' => '+1234567890',
-                'email' => 'consignee' . $vehicle->id . '@example.com',
+                'email' => 'consignee'.$vehicle->id.'@example.com',
             ]);
 
             // Create sample photos for each vehicle
             VehiclePhoto::create([
                 'vehicle_id' => $vehicle->id,
-                'photo_path' => 'sample-photos/vehicle-' . $vehicle->id . '-1.jpg',
+                'photo_path' => 'sample-photos/vehicle-'.$vehicle->id.'-1.jpg',
                 'photo_type' => 'exterior',
                 'uploaded_by' => $admin->id,
             ]);
 
             VehiclePhoto::create([
                 'vehicle_id' => $vehicle->id,
-                'photo_path' => 'sample-photos/vehicle-' . $vehicle->id . '-2.jpg',
+                'photo_path' => 'sample-photos/vehicle-'.$vehicle->id.'-2.jpg',
                 'photo_type' => 'interior',
                 'uploaded_by' => $admin->id,
             ]);
@@ -224,5 +215,36 @@ class DatabaseSeeder extends Seeder
         foreach ($tasks as $taskData) {
             Task::create($taskData);
         }
+
+        // Create tasks for today for quick demo (no factory required)
+        Task::create([
+            'title' => 'Today: Yard Audit',
+            'description' => 'Perform quick audit of vehicles in yard',
+            'work_date' => now()->toDateString(),
+            'work_time' => '10:30',
+            'status' => 'pending',
+            'priority' => 'medium',
+            'vehicle_id' => 1,
+            'assigned_to' => $employee1->id,
+            'created_by' => $manager->id,
+            'due_date' => now()->toDateString(),
+        ]);
+
+        Task::create([
+            'title' => 'Today: Wash & Prep',
+            'description' => 'Wash the vehicle and prepare for photos',
+            'work_date' => now()->toDateString(),
+            'work_time' => '13:00',
+            'status' => 'running',
+            'priority' => 'high',
+            'vehicle_id' => 2,
+            'assigned_to' => $employee2->id,
+            'created_by' => $admin->id,
+            'due_date' => now()->toDateString(),
+        ]);
+
+        // Generate a personal access token for the admin for API testing
+        $token = $admin->createToken('seeded-ui-token')->plainTextToken;
+        file_put_contents(storage_path('app/seeded_token.txt'), $token);
     }
 }

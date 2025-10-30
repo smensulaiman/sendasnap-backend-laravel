@@ -4,13 +4,12 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
 
 /**
  * @OA\Tag(
@@ -26,10 +25,13 @@ class AuthController extends Controller
      *     summary="Register a new user",
      *     description="Create a new user account",
      *     tags={"Authentication"},
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
      *             required={"name","email","password","password_confirmation"},
+     *
      *             @OA\Property(property="name", type="string", example="John Doe"),
      *             @OA\Property(property="email", type="string", format="email", example="john@example.com"),
      *             @OA\Property(property="password", type="string", format="password", example="password123"),
@@ -38,10 +40,13 @@ class AuthController extends Controller
      *             @OA\Property(property="phone", type="string", example="+1234567890")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="User registered successfully",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="message", type="string", example="User registered successfully"),
      *             @OA\Property(property="data", type="object",
@@ -50,10 +55,13 @@ class AuthController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=422,
      *         description="Validation error",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=false),
      *             @OA\Property(property="message", type="string", example="Validation failed"),
      *             @OA\Property(property="errors", type="object")
@@ -72,7 +80,9 @@ class AuthController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return $this->errorResponse('Validation failed', $validator->errors(), 422);
+            $messages = implode(' ', $validator->errors()->all());
+
+            return $this->errorResponse($messages ?: 'Validation failed', $validator->errors(), 422);
         }
 
         $user = User::create([
@@ -96,26 +106,51 @@ class AuthController extends Controller
      */
     public function login(Request $request): JsonResponse
     {
+        // Quick guard for missing fields to avoid unexpected exceptions
+        $missing = [];
+        if (! $request->filled('email')) {
+            $missing[] = 'email';
+        }
+        if (! $request->filled('password')) {
+            $missing[] = 'password';
+        }
+        if (! empty($missing)) {
+            return $this->errorResponse(
+                'The following field(s) are required: '.implode(', ', $missing).'.',
+                array_combine($missing, array_map(fn ($f) => ["The {$f} field is required."], $missing)),
+                422
+            );
+        }
+
         $validator = Validator::make($request->all(), [
             'email' => 'required|email',
             'password' => 'required',
         ]);
 
         if ($validator->fails()) {
-            return $this->errorResponse('Validation failed', $validator->errors(), 422);
+            $messages = implode(' ', $validator->errors()->all());
+
+            return $this->errorResponse($messages ?: 'Validation failed', $validator->errors(), 422);
         }
 
-        if (!Auth::attempt($request->only('email', 'password'))) {
-            return $this->errorResponse('Invalid credentials', [], 401);
+        try {
+            if (! Auth::attempt($request->only('email', 'password'))) {
+                return $this->errorResponse('Invalid credentials', [], 401);
+            }
+
+            $user = Auth::user();
+            $token = $user->createToken('auth_token')->plainTextToken;
+
+            return $this->successResponse('Login successful', [
+                'user' => $user,
+                'token' => $token,
+            ]);
+        } catch (\Throwable $e) {
+            // Always return JSON error payloads
+            return $this->errorResponse('Unable to process login request.', [
+                'exception' => [$e->getMessage()],
+            ], 500);
         }
-
-        $user = Auth::user();
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        return $this->successResponse('Login successful', [
-            'user' => $user,
-            'token' => $token,
-        ]);
     }
 
     /**
@@ -197,7 +232,7 @@ class AuthController extends Controller
 
         $user = $request->user();
 
-        if (!Hash::check($request->current_password, $user->password)) {
+        if (! Hash::check($request->current_password, $user->password)) {
             return $this->errorResponse('Current password is incorrect', [], 400);
         }
 

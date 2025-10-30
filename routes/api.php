@@ -1,11 +1,12 @@
 <?php
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\ProfileController;
+use App\Http\Controllers\Api\V1\TaskController;
 use App\Http\Controllers\Api\V1\UserController;
 use App\Http\Controllers\Api\V1\VehicleController;
-use App\Http\Controllers\Api\V1\TaskController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -41,7 +42,15 @@ Route::prefix('v1')->group(function () {
     // Protected Routes
     Route::middleware('auth:sanctum')->group(function () {
 
-        // User Management Routes (Admin only)
+        // Managers: limited capabilities (define BEFORE admin to avoid route shadowing)
+        Route::middleware('role:manager')->group(function () {
+            // Managers can index and show users, update limited fields, and create employees
+            Route::get('users', [UserController::class, 'index']);
+            Route::get('users/{user}', [UserController::class, 'show']);
+            Route::put('users/{user}', [UserController::class, 'update']);
+            Route::post('employees', [UserController::class, 'storeEmployee']);
+        });
+        // User Management Routes - Admin full CRUD
         Route::middleware('role:admin')->group(function () {
             Route::apiResource('users', UserController::class);
             Route::post('users/{user}/assign-role', [UserController::class, 'assignRole']);
@@ -62,5 +71,15 @@ Route::prefix('v1')->group(function () {
         Route::delete('tasks/{task}/attachments/{attachment}', [TaskController::class, 'deleteAttachment']);
         Route::get('tasks/my-tasks', [TaskController::class, 'myTasks']);
         Route::get('tasks/assigned-to-me', [TaskController::class, 'assignedToMe']);
+
+        // Profile Management Routes
+        Route::prefix('profile')->group(function () {
+            Route::get('/', [ProfileController::class, 'show']);
+            Route::put('/', [ProfileController::class, 'update']);
+            Route::post('avatar', [ProfileController::class, 'uploadAvatar']);
+            Route::delete('avatar', [ProfileController::class, 'removeAvatar']);
+            Route::post('change-password', [ProfileController::class, 'changePassword']);
+            Route::get('task-stats', [ProfileController::class, 'taskStats']);
+        });
     });
 });

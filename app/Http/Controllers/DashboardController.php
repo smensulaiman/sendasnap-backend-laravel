@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Vehicle;
 use App\Models\Task;
 use App\Models\User;
-use Illuminate\Http\Request;
+use App\Models\Vehicle;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
@@ -86,7 +85,10 @@ class DashboardController extends Controller
 
     public function users()
     {
-        $this->authorize('viewAny', User::class);
+        $user = Auth::user();
+        if (! in_array($user->role, ['admin', 'manager'])) {
+            abort(403, 'This action is unauthorized.');
+        }
 
         $users = User::orderBy('created_at', 'desc')->paginate(15);
 

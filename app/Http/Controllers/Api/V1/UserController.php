@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
@@ -60,7 +60,9 @@ class UserController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return $this->errorResponse('Validation failed', $validator->errors(), 422);
+            $messages = implode(' ', $validator->errors()->all());
+
+            return $this->errorResponse($messages ?: 'Validation failed', $validator->errors(), 422);
         }
 
         $user = User::create([
@@ -72,6 +74,37 @@ class UserController extends Controller
         ]);
 
         return $this->successResponse('User created successfully', [
+            'user' => $user,
+        ], 201);
+    }
+
+    /**
+     * Managers can create new employees quickly.
+     */
+    public function storeEmployee(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8',
+            'phone' => 'nullable|string|max:20',
+        ]);
+
+        if ($validator->fails()) {
+            $messages = implode(' ', $validator->errors()->all());
+
+            return $this->errorResponse($messages ?: 'Validation failed', $validator->errors(), 422);
+        }
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role' => 'employee',
+            'phone' => $request->phone,
+        ]);
+
+        return $this->successResponse('Employee created successfully', [
             'user' => $user,
         ], 201);
     }
@@ -93,14 +126,16 @@ class UserController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'sometimes|string|max:255',
-            'email' => 'sometimes|string|email|max:255|unique:users,email,' . $user->id,
+            'email' => 'sometimes|string|email|max:255|unique:users,email,'.$user->id,
             'password' => 'sometimes|string|min:8|confirmed',
             'role' => 'sometimes|in:admin,manager,employee,client',
             'phone' => 'nullable|string|max:20',
         ]);
 
         if ($validator->fails()) {
-            return $this->errorResponse('Validation failed', $validator->errors(), 422);
+            $messages = implode(' ', $validator->errors()->all());
+
+            return $this->errorResponse($messages ?: 'Validation failed', $validator->errors(), 422);
         }
 
         $updateData = $request->only(['name', 'email', 'role', 'phone']);

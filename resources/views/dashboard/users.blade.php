@@ -1,4 +1,4 @@
-@extends('layouts.dashboard')
+@extends('layouts.app')
 
 @section('title', 'Users')
 
@@ -11,7 +11,7 @@
                     <span class="material-symbols-rounded">filter_list</span>
                     Filters
                 </button>
-                <button class="btn btn-primary" onclick="showAddUserModal()">
+                <button class="btn btn-primary" onclick="prepareUserDrawer()">
                     <span class="material-symbols-rounded">add</span>
                     Add User
                 </button>
@@ -128,7 +128,7 @@
                     </div>
                     <h3 style="margin-bottom: 8px; color: hsl(var(--foreground));">No users found</h3>
                     <p style="margin-bottom: 24px;">Get started by adding your first user to the system.</p>
-                    <button class="btn btn-primary" onclick="showAddUserModal()">
+                    <button class="btn btn-primary" onclick="prepareUserDrawer()">
                         <span class="material-symbols-rounded">add</span>
                         Add User
                     </button>
@@ -136,6 +136,49 @@
             @endif
         </div>
     </div>
+
+    <x-side-drawer id="userDrawer" title="Add User" width="360px">
+        <form id="userDrawerForm" class="d-flex flex-column" style="gap: 12px;">
+            <div>
+                <label class="text-sm font-medium mb-1" style="display:block;">Full Name</label>
+                <input id="drawerUserName" type="text" class="input" placeholder="Enter full name" required />
+            </div>
+            <div>
+                <label class="text-sm font-medium mb-1" style="display:block;">Email Address</label>
+                <input id="drawerUserEmail" type="email" class="input" placeholder="user@example.com" required />
+            </div>
+            <div>
+                <label class="text-sm font-medium mb-1" style="display:block;">Phone Number (optional)</label>
+                <input id="drawerUserPhone" type="tel" class="input" placeholder="+1 555 000 1111" />
+            </div>
+            <div class="d-flex" style="gap: 12px;">
+                <div style="flex:1;">
+                    <label class="text-sm font-medium mb-1" style="display:block;">Password</label>
+                    <input id="drawerUserPassword" type="password" class="input" placeholder="Min 8 characters" required />
+                </div>
+                <div style="flex:1;">
+                    <label class="text-sm font-medium mb-1" style="display:block;">Confirm Password</label>
+                    <input id="drawerUserPasswordConfirm" type="password" class="input" placeholder="Repeat password" required />
+                </div>
+            </div>
+            <div>
+                <label class="text-sm font-medium mb-1" style="display:block;">Role</label>
+                <select id="drawerUserRole" class="input">
+                    <option value="employee" selected>Employee</option>
+                    <option value="manager" @if(auth()->user()->role !== 'admin') disabled @endif>Manager</option>
+                    <option value="admin" @if(auth()->user()->role !== 'admin') disabled @endif>Admin</option>
+                    <option value="client">Client</option>
+                </select>
+            </div>
+            <div class="d-flex align-items-center justify-content-end" style="gap: 8px;">
+                <x-button variant="outline" type="button" onclick="closeDrawer('userDrawer')">Cancel</x-button>
+                <x-button variant="primary" type="submit" id="drawerUserSubmitBtn">
+                    <span id="drawerUserSubmitText">Create User</span>
+                    <span class="loading" id="drawerUserSubmitLoading" style="display:none;"></span>
+                </x-button>
+            </div>
+        </form>
+    </x-side-drawer>
 
     <script>
         function showFilters() {
@@ -181,56 +224,105 @@
             });
         }
 
-        function showAddUserModal() {
-            Swal.fire({
-                title: 'Add New User',
-                html: `
-                        <div style="text-align: left;">
-                            <div style="margin-bottom: 16px;">
-                                <label style="display: block; margin-bottom: 8px; font-weight: 500;">Full Name *</label>
-                                <input type="text" placeholder="Enter full name" style="width: 100%; padding: 8px 12px; border: 1px solid hsl(var(--border)); border-radius: 6px;">
-                            </div>
-                            <div style="margin-bottom: 16px;">
-                                <label style="display: block; margin-bottom: 8px; font-weight: 500;">Email Address *</label>
-                                <input type="email" placeholder="Enter email address" style="width: 100%; padding: 8px 12px; border: 1px solid hsl(var(--border)); border-radius: 6px;">
-                            </div>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
-                                <div>
-                                    <label style="display: block; margin-bottom: 8px; font-weight: 500;">Password *</label>
-                                    <input type="password" placeholder="Enter password" style="width: 100%; padding: 8px 12px; border: 1px solid hsl(var(--border)); border-radius: 6px;">
-                                </div>
-                                <div>
-                                    <label style="display: block; margin-bottom: 8px; font-weight: 500;">Confirm Password *</label>
-                                    <input type="password" placeholder="Confirm password" style="width: 100%; padding: 8px 12px; border: 1px solid hsl(var(--border)); border-radius: 6px;">
-                                </div>
-                            </div>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
-                                <div>
-                                    <label style="display: block; margin-bottom: 8px; font-weight: 500;">Role *</label>
-                                    <select style="width: 100%; padding: 8px 12px; border: 1px solid hsl(var(--border)); border-radius: 6px;">
-                                        <option value="client">Client</option>
-                                        <option value="employee">Employee</option>
-                                        <option value="manager">Manager</option>
-                                        <option value="admin">Admin</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label style="display: block; margin-bottom: 8px; font-weight: 500;">Phone Number</label>
-                                    <input type="tel" placeholder="Enter phone number" style="width: 100%; padding: 8px 12px; border: 1px solid hsl(var(--border)); border-radius: 6px;">
-                                </div>
-                            </div>
-                        </div>
-                    `,
-                showCancelButton: true,
-                confirmButtonText: 'Add User',
-                cancelButtonText: 'Cancel',
-                confirmButtonColor: 'hsl(var(--primary))',
-                width: '500px'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    showToast('User added successfully', 'success');
+        const currentUserRole = @json(auth()->user()->role);
+        const userDrawerForm = document.getElementById('userDrawerForm');
+
+        function resetUserDrawer() {
+            userDrawerForm.reset();
+            const roleSelect = document.getElementById('drawerUserRole');
+            roleSelect.value = 'employee';
+        }
+
+        function prepareUserDrawer() {
+            resetUserDrawer();
+            openDrawer('userDrawer');
+        }
+
+        userDrawerForm.addEventListener('submit', submitUserFromDrawer);
+
+        async function submitUserFromDrawer(event) {
+            event.preventDefault();
+
+            const submitBtn = document.getElementById('drawerUserSubmitBtn');
+            const submitText = document.getElementById('drawerUserSubmitText');
+            const submitLoading = document.getElementById('drawerUserSubmitLoading');
+
+            const name = document.getElementById('drawerUserName').value.trim();
+            const email = document.getElementById('drawerUserEmail').value.trim();
+            const phone = document.getElementById('drawerUserPhone').value.trim();
+            const password = document.getElementById('drawerUserPassword').value;
+            const passwordConfirm = document.getElementById('drawerUserPasswordConfirm').value;
+            let role = document.getElementById('drawerUserRole').value;
+
+            if (!name || !email || !password || !passwordConfirm) {
+                Swal.fire('Missing information', 'Please fill in all required fields.', 'warning');
+                return;
+            }
+
+            if (password !== passwordConfirm) {
+                Swal.fire('Password mismatch', 'Passwords do not match.', 'warning');
+                return;
+            }
+
+            if (currentUserRole !== 'admin') {
+                role = 'employee';
+            }
+
+            const payload = {
+                name,
+                email,
+                password,
+                password_confirmation: passwordConfirm,
+                role,
+                phone: phone || null,
+            };
+
+            let endpoint = '/api/v1/users';
+            if (currentUserRole !== 'admin') {
+                endpoint = '/api/v1/employees';
+                delete payload.password_confirmation;
+            }
+
+            const headers = {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            };
+
+            const apiToken = window.localStorage ? localStorage.getItem('api_token') : null;
+            if (!apiToken) {
+                Swal.fire('Session expired', 'Please log in again to continue.', 'error');
+                return;
+            }
+
+            headers['Authorization'] = `Bearer ${apiToken}`;
+
+            submitBtn.disabled = true;
+            submitText.style.display = 'none';
+            submitLoading.style.display = 'inline-block';
+
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify(payload),
+                });
+
+                const data = await response.json().catch(() => ({}));
+
+                if (!response.ok) {
+                    throw new Error(data?.message || 'Unable to create user.');
                 }
-            });
+
+                Swal.fire('Success', 'User created successfully.', 'success');
+                closeDrawer('userDrawer');
+                setTimeout(() => window.location.reload(), 900);
+            } catch (error) {
+                Swal.fire('Error', error.message || 'Unable to create user.', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitText.style.display = 'inline';
+                submitLoading.style.display = 'none';
+            }
         }
 
         function viewUser(id) {
