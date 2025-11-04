@@ -38,7 +38,19 @@ class DashboardController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(15);
 
-        return view('dashboard.vehicles', compact('vehicles'));
+        $stats = [
+            'today_count' => Vehicle::whereDate('created_at', today())->count(),
+            'total_vehicles' => Vehicle::count(),
+        ];
+
+        return view('dashboard.vehicles', compact('vehicles', 'stats'));
+    }
+
+    public function showVehicle(Vehicle $vehicle)
+    {
+        $vehicle->load(['creator', 'photos', 'consigneeDetails', 'tasks']);
+
+        return view('dashboard.vehicle-detail', compact('vehicle'));
     }
 
     public function tasks()

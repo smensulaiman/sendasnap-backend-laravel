@@ -98,8 +98,12 @@ class VehicleController extends Controller
 
         $vehicles = $query->paginate($request->get('per_page', 15));
 
+        $transformedVehicles = $vehicles->getCollection()->map(function ($vehicle) {
+            return $this->transformVehicle($vehicle);
+        });
+
         return $this->successResponse('Vehicles retrieved successfully', [
-            'vehicles' => $vehicles->items(),
+            'vehicles' => $transformedVehicles,
             'pagination' => [
                 'current_page' => $vehicles->currentPage(),
                 'last_page' => $vehicles->lastPage(),
@@ -218,7 +222,7 @@ class VehicleController extends Controller
         $vehicle->load(['creator', 'photos', 'consigneeDetails']);
 
         return $this->successResponse('Vehicle created successfully', [
-            'vehicle' => $vehicle,
+            'vehicle' => $this->transformVehicle($vehicle),
         ], 201);
     }
 
@@ -254,7 +258,7 @@ class VehicleController extends Controller
         $vehicle->load(['creator', 'photos', 'consigneeDetails', 'tasks']);
 
         return $this->successResponse('Vehicle retrieved successfully', [
-            'vehicle' => $vehicle,
+            'vehicle' => $this->transformVehicle($vehicle),
         ]);
     }
 
@@ -357,7 +361,7 @@ class VehicleController extends Controller
         $vehicle->load(['creator', 'photos', 'consigneeDetails']);
 
         return $this->successResponse('Vehicle updated successfully', [
-            'vehicle' => $vehicle,
+            'vehicle' => $this->transformVehicle($vehicle),
         ]);
     }
 
@@ -456,8 +460,23 @@ class VehicleController extends Controller
             'uploaded_by' => auth()->id(),
         ]);
 
+        $photo->load('uploader');
+
         return $this->successResponse('Photo uploaded successfully', [
-            'photo' => $photo,
+            'photo' => [
+                'id' => $photo->id,
+                'vehicle_id' => $photo->vehicle_id,
+                'photo_path' => $photo->photo_path,
+                'photo_url' => Storage::disk('public')->url($photo->photo_path),
+                'photo_type' => $photo->photo_type,
+                'uploaded_by' => $photo->uploaded_by,
+                'uploader' => $photo->uploader ? [
+                    'id' => $photo->uploader->id,
+                    'name' => $photo->uploader->name,
+                ] : null,
+                'created_at' => $photo->created_at,
+                'updated_at' => $photo->updated_at,
+            ],
         ], 201);
     }
 
@@ -542,7 +561,9 @@ class VehicleController extends Controller
         $vehicles = $query->limit(20)->get();
 
         return $this->successResponse('Search completed', [
-            'vehicles' => $vehicles,
+            'vehicles' => $vehicles->map(function ($vehicle) {
+                return $this->transformVehicle($vehicle);
+            }),
         ]);
     }
 
@@ -582,6 +603,40 @@ class VehicleController extends Controller
         return $this->successResponse('Statistics retrieved successfully', [
             'stats' => $stats,
         ]);
+    }
+
+    /**
+     * Transform vehicle data with full photo URLs
+     */
+    private function transformVehicle(Vehicle $vehicle): array
+    {
+        $vehicleArray = $vehicle->toArray();
+        
+        // Transform photos to include full URLs
+        if (isset($vehicleArray['photos']) && is_array($vehicleArray['photos'])) {
+            $vehicleArray['photos'] = array_map(function ($photo) {
+                return [
+                    'id' => $photo['id'],
+                    'vehicle_id' => $photo['vehicle_id'],
+                    'photo_path' => $photo['photo_path'],
+                    'photo_url' => Storage::disk('public')->url($photo['photo_path']),
+                    'photo_type' => $photo['photo_type'],
+                    'uploaded_by' => $photo['uploaded_by'],
+                    'created_at' => $photo['created_at'],
+                    'updated_at' => $photo['updated_at'],
+                ];
+            }, $vehicleArray['photos']);
+        }
+        
+        // Transform document URLs if they exist
+        if (isset($vehicleArray['auction_sheet']) && $vehicleArray['auction_sheet']) {
+            $vehicleArray['auction_sheet_url'] = Storage::disk('public')->url($vehicleArray['auction_sheet']);
+        }
+        if (isset($vehicleArray['tohon_copy']) && $vehicleArray['tohon_copy']) {
+            $vehicleArray['tohon_copy_url'] = Storage::disk('public')->url($vehicleArray['tohon_copy']);
+        }
+        
+        return $vehicleArray;
     }
 
     /**

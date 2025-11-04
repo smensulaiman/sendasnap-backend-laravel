@@ -42,6 +42,7 @@ Route::post('/logout', function (Illuminate\Http\Request $request) {
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/vehicles', [DashboardController::class, 'vehicles'])->name('dashboard.vehicles');
+    Route::get('/dashboard/vehicles/{vehicle}', [DashboardController::class, 'showVehicle'])->name('dashboard.vehicles.show');
     // Tasks page (beautiful pastel design)
     Route::get('/dashboard/tasks', [DashboardController::class, 'tasks'])->name('dashboard.tasks');
     Route::get('/dashboard/users', [DashboardController::class, 'users'])->name('dashboard.users');
