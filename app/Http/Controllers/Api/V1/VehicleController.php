@@ -11,10 +11,56 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
+/**
+ * @OA\Tag(
+ *     name="Vehicles",
+ *     description="API endpoints for vehicle management"
+ * )
+ */
 class VehicleController extends Controller
 {
     /**
-     * Display a listing of vehicles
+     * @OA\Get(
+     *     path="/api/v1/vehicles",
+     *     summary="List vehicles",
+     *     description="Get a paginated list of vehicles with optional filtering",
+     *     tags={"Vehicles"},
+     *     security={{"sanctum":{}}},
+     *
+     *     @OA\Parameter(
+     *         name="search",
+     *         in="query",
+     *         description="Search by serial number, make, model, chassis model, or plate number",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="status",
+     *         in="query",
+     *         description="Filter by status",
+     *         required=false,
+     *         @OA\Schema(type="string", enum={"pending","in_yard","ready","sold"})
+     *     ),
+     *     @OA\Parameter(
+     *         name="make",
+     *         in="query",
+     *         description="Filter by make",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="Items per page",
+     *         required=false,
+     *         @OA\Schema(type="integer", default=15)
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="Vehicles retrieved successfully"
+     *     )
+     * )
      */
     public function index(Request $request): JsonResponse
     {
@@ -64,7 +110,51 @@ class VehicleController extends Controller
     }
 
     /**
-     * Store a newly created vehicle
+     * @OA\Post(
+     *     path="/api/v1/vehicles",
+     *     summary="Create vehicle",
+     *     description="Create a new vehicle with consignee details",
+     *     tags={"Vehicles"},
+     *     security={{"sanctum":{}}},
+     *
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"serial_number","make","model","chassis_model","cc","year","color","vehicle_buy_date","auction_ship_number","net_weight","area","length","width","height","buying_price","expected_yard_date","consignee_name","consignee_address","consignee_phone","consignee_email"},
+     *             @OA\Property(property="serial_number", type="string", example="SN123456"),
+     *             @OA\Property(property="make", type="string", example="Toyota"),
+     *             @OA\Property(property="model", type="string", example="Camry"),
+     *             @OA\Property(property="chassis_model", type="string", example="CH-123"),
+     *             @OA\Property(property="cc", type="integer", example=2000),
+     *             @OA\Property(property="year", type="integer", example=2020),
+     *             @OA\Property(property="color", type="string", example="Black"),
+     *             @OA\Property(property="vehicle_buy_date", type="string", format="date", example="2024-01-01"),
+     *             @OA\Property(property="auction_ship_number", type="string", example="SHIP-001"),
+     *             @OA\Property(property="net_weight", type="number", example=1500.5),
+     *             @OA\Property(property="area", type="string", example="Tokyo"),
+     *             @OA\Property(property="length", type="number", example=4.5),
+     *             @OA\Property(property="width", type="number", example=1.8),
+     *             @OA\Property(property="height", type="number", example=1.5),
+     *             @OA\Property(property="plate_number", type="string", example="ABC-123"),
+     *             @OA\Property(property="buying_price", type="number", example=25000.00),
+     *             @OA\Property(property="expected_yard_date", type="string", format="date", example="2024-02-01"),
+     *             @OA\Property(property="consignee_name", type="string", example="John Doe"),
+     *             @OA\Property(property="consignee_address", type="string", example="123 Main St"),
+     *             @OA\Property(property="consignee_phone", type="string", example="+1234567890"),
+     *             @OA\Property(property="consignee_email", type="string", format="email", example="john@example.com")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=201,
+     *         description="Vehicle created successfully"
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error"
+     *     )
+     * )
      */
     public function store(Request $request): JsonResponse
     {
@@ -133,7 +223,31 @@ class VehicleController extends Controller
     }
 
     /**
-     * Display the specified vehicle
+     * @OA\Get(
+     *     path="/api/v1/vehicles/{id}",
+     *     summary="Get vehicle",
+     *     description="Get a specific vehicle by ID",
+     *     tags={"Vehicles"},
+     *     security={{"sanctum":{}}},
+     *
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="Vehicle ID",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="Vehicle retrieved successfully"
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=404,
+     *         description="Vehicle not found"
+     *     )
+     * )
      */
     public function show(Vehicle $vehicle): JsonResponse
     {
@@ -145,7 +259,35 @@ class VehicleController extends Controller
     }
 
     /**
-     * Update the specified vehicle
+     * @OA\Put(
+     *     path="/api/v1/vehicles/{id}",
+     *     summary="Update vehicle",
+     *     description="Update an existing vehicle",
+     *     tags={"Vehicles"},
+     *     security={{"sanctum":{}}},
+     *
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="Vehicle ID",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *
+     *     @OA\RequestBody(
+     *         required=false,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="serial_number", type="string", example="SN123456"),
+     *             @OA\Property(property="make", type="string", example="Toyota"),
+     *             @OA\Property(property="status", type="string", enum={"pending","in_yard","ready","sold"})
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="Vehicle updated successfully"
+     *     )
+     * )
      */
     public function update(Request $request, Vehicle $vehicle): JsonResponse
     {
@@ -220,7 +362,26 @@ class VehicleController extends Controller
     }
 
     /**
-     * Remove the specified vehicle
+     * @OA\Delete(
+     *     path="/api/v1/vehicles/{id}",
+     *     summary="Delete vehicle",
+     *     description="Delete a vehicle and all associated files",
+     *     tags={"Vehicles"},
+     *     security={{"sanctum":{}}},
+     *
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="Vehicle ID",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="Vehicle deleted successfully"
+     *     )
+     * )
      */
     public function destroy(Vehicle $vehicle): JsonResponse
     {
@@ -243,7 +404,38 @@ class VehicleController extends Controller
     }
 
     /**
-     * Upload photo for vehicle
+     * @OA\Post(
+     *     path="/api/v1/vehicles/{id}/photos",
+     *     summary="Upload vehicle photo",
+     *     description="Upload a photo for a vehicle",
+     *     tags={"Vehicles"},
+     *     security={{"sanctum":{}}},
+     *
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="Vehicle ID",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 required={"photo","photo_type"},
+     *                 @OA\Property(property="photo", type="string", format="binary"),
+     *                 @OA\Property(property="photo_type", type="string", enum={"exterior","interior","engine","document","other"})
+     *             )
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=201,
+     *         description="Photo uploaded successfully"
+     *     )
+     * )
      */
     public function uploadPhoto(Request $request, Vehicle $vehicle): JsonResponse
     {
@@ -270,7 +462,33 @@ class VehicleController extends Controller
     }
 
     /**
-     * Delete photo from vehicle
+     * @OA\Delete(
+     *     path="/api/v1/vehicles/{id}/photos/{photo}",
+     *     summary="Delete vehicle photo",
+     *     description="Delete a photo from a vehicle",
+     *     tags={"Vehicles"},
+     *     security={{"sanctum":{}}},
+     *
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="Vehicle ID",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="photo",
+     *         in="path",
+     *         description="Photo ID",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="Photo deleted successfully"
+     *     )
+     * )
      */
     public function deletePhoto(Vehicle $vehicle, VehiclePhoto $photo): JsonResponse
     {
@@ -285,7 +503,26 @@ class VehicleController extends Controller
     }
 
     /**
-     * Search vehicles
+     * @OA\Get(
+     *     path="/api/v1/vehicles/search",
+     *     summary="Search vehicles",
+     *     description="Search vehicles by query string",
+     *     tags={"Vehicles"},
+     *     security={{"sanctum":{}}},
+     *
+     *     @OA\Parameter(
+     *         name="q",
+     *         in="query",
+     *         description="Search query",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="Search completed"
+     *     )
+     * )
      */
     public function search(Request $request): JsonResponse
     {
@@ -310,7 +547,18 @@ class VehicleController extends Controller
     }
 
     /**
-     * Get vehicle statistics
+     * @OA\Get(
+     *     path="/api/v1/vehicles/stats",
+     *     summary="Get vehicle statistics",
+     *     description="Get statistics about vehicles",
+     *     tags={"Vehicles"},
+     *     security={{"sanctum":{}}},
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="Statistics retrieved successfully"
+     *     )
+     * )
      */
     public function stats(): JsonResponse
     {

@@ -9,10 +9,27 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
+/**
+ * @OA\Tag(
+ *     name="Users",
+ *     description="API endpoints for user management"
+ * )
+ */
 class UserController extends Controller
 {
     /**
-     * Display a listing of users
+     * @OA\Get(
+     *     path="/api/v1/users",
+     *     summary="List users",
+     *     description="Get a paginated list of users",
+     *     tags={"Users"},
+     *     security={{"sanctum":{}}},
+     *
+     *     @OA\Parameter(name="search", in="query", description="Search query", required=false, @OA\Schema(type="string")),
+     *     @OA\Parameter(name="role", in="query", description="Filter by role", required=false, @OA\Schema(type="string", enum={"admin","manager","employee","client"})),
+     *
+     *     @OA\Response(response=200, description="Users retrieved successfully")
+     * )
      */
     public function index(Request $request): JsonResponse
     {
@@ -47,7 +64,28 @@ class UserController extends Controller
     }
 
     /**
-     * Store a newly created user
+     * @OA\Post(
+     *     path="/api/v1/users",
+     *     summary="Create user",
+     *     description="Create a new user (Admin only)",
+     *     tags={"Users"},
+     *     security={{"sanctum":{}}},
+     *
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"name","email","password","password_confirmation","role"},
+     *             @OA\Property(property="name", type="string", example="John Doe"),
+     *             @OA\Property(property="email", type="string", format="email", example="john@example.com"),
+     *             @OA\Property(property="password", type="string", format="password", example="password123"),
+     *             @OA\Property(property="password_confirmation", type="string", format="password", example="password123"),
+     *             @OA\Property(property="role", type="string", enum={"admin","manager","employee","client"}, example="employee"),
+     *             @OA\Property(property="phone", type="string", example="+1234567890")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(response=201, description="User created successfully")
+     * )
      */
     public function store(Request $request): JsonResponse
     {
@@ -110,7 +148,17 @@ class UserController extends Controller
     }
 
     /**
-     * Display the specified user
+     * @OA\Get(
+     *     path="/api/v1/users/{id}",
+     *     summary="Get user",
+     *     description="Get a specific user by ID",
+     *     tags={"Users"},
+     *     security={{"sanctum":{}}},
+     *
+     *     @OA\Parameter(name="id", in="path", description="User ID", required=true, @OA\Schema(type="integer")),
+     *
+     *     @OA\Response(response=200, description="User retrieved successfully")
+     * )
      */
     public function show(User $user): JsonResponse
     {
@@ -120,7 +168,26 @@ class UserController extends Controller
     }
 
     /**
-     * Update the specified user
+     * @OA\Put(
+     *     path="/api/v1/users/{id}",
+     *     summary="Update user",
+     *     description="Update an existing user",
+     *     tags={"Users"},
+     *     security={{"sanctum":{}}},
+     *
+     *     @OA\Parameter(name="id", in="path", description="User ID", required=true, @OA\Schema(type="integer")),
+     *
+     *     @OA\RequestBody(
+     *         required=false,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="name", type="string", example="John Doe"),
+     *             @OA\Property(property="email", type="string", format="email", example="john@example.com"),
+     *             @OA\Property(property="role", type="string", enum={"admin","manager","employee","client"})
+     *         )
+     *     ),
+     *
+     *     @OA\Response(response=200, description="User updated successfully")
+     * )
      */
     public function update(Request $request, User $user): JsonResponse
     {
@@ -152,7 +219,17 @@ class UserController extends Controller
     }
 
     /**
-     * Remove the specified user
+     * @OA\Delete(
+     *     path="/api/v1/users/{id}",
+     *     summary="Delete user",
+     *     description="Delete a user (Admin only)",
+     *     tags={"Users"},
+     *     security={{"sanctum":{}}},
+     *
+     *     @OA\Parameter(name="id", in="path", description="User ID", required=true, @OA\Schema(type="integer")),
+     *
+     *     @OA\Response(response=200, description="User deleted successfully")
+     * )
      */
     public function destroy(User $user): JsonResponse
     {
@@ -167,7 +244,25 @@ class UserController extends Controller
     }
 
     /**
-     * Assign role to user
+     * @OA\Post(
+     *     path="/api/v1/users/{id}/assign-role",
+     *     summary="Assign role to user",
+     *     description="Assign a role to a user (Admin only)",
+     *     tags={"Users"},
+     *     security={{"sanctum":{}}},
+     *
+     *     @OA\Parameter(name="id", in="path", description="User ID", required=true, @OA\Schema(type="integer")),
+     *
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"role"},
+     *             @OA\Property(property="role", type="string", enum={"admin","manager","employee","client"}, example="manager")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(response=200, description="Role assigned successfully")
+     * )
      */
     public function assignRole(Request $request, User $user): JsonResponse
     {
