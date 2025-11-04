@@ -14,10 +14,10 @@ class UpdateProfileRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255'],
+            'name' => ['sometimes', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:20'],
             'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
-            'current_password' => ['nullable', 'string'],
+            'current_password' => ['required_with:password', 'string'],
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
         ];
     }

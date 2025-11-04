@@ -63,6 +63,13 @@
                 </a>
             </li>
         @endif
+        <li>
+            <a href="{{ route('l5-swagger.default.api') }}" target="_blank"
+                class="{{ request()->routeIs('l5-swagger.*') ? 'active' : '' }}">
+                <span class="material-symbols-rounded">api</span>
+                API Documentation
+            </a>
+        </li>
         <li style="margin-top: 24px; padding-top: 24px; border-top: 1px solid hsl(var(--border));">
             <a href="{{ route('profile.show') }}">
                 <span class="material-symbols-rounded">account_circle</span>

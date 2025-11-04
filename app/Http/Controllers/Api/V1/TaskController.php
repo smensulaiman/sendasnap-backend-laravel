@@ -10,10 +10,31 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
+/**
+ * @OA\Tag(
+ *     name="Tasks",
+ *     description="API endpoints for task management"
+ * )
+ */
 class TaskController extends Controller
 {
     /**
-     * Display a listing of tasks
+     * @OA\Get(
+     *     path="/api/v1/tasks",
+     *     summary="List tasks",
+     *     description="Get a paginated list of tasks with optional filtering",
+     *     tags={"Tasks"},
+     *     security={{"sanctum":{}}},
+     *
+     *     @OA\Parameter(name="search", in="query", description="Search query", required=false, @OA\Schema(type="string")),
+     *     @OA\Parameter(name="status", in="query", description="Filter by status", required=false, @OA\Schema(type="string", enum={"pending","running","completed","cancelled"})),
+     *     @OA\Parameter(name="priority", in="query", description="Filter by priority", required=false, @OA\Schema(type="string", enum={"low","medium","high","urgent"})),
+     *     @OA\Parameter(name="assigned_to", in="query", description="Filter by assigned user ID", required=false, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="vehicle_id", in="query", description="Filter by vehicle ID", required=false, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="per_page", in="query", description="Items per page", required=false, @OA\Schema(type="integer", default=15)),
+     *
+     *     @OA\Response(response=200, description="Tasks retrieved successfully")
+     * )
      */
     public function index(Request $request): JsonResponse
     {
@@ -70,7 +91,31 @@ class TaskController extends Controller
     }
 
     /**
-     * Store a newly created task
+     * @OA\Post(
+     *     path="/api/v1/tasks",
+     *     summary="Create task",
+     *     description="Create a new task",
+     *     tags={"Tasks"},
+     *     security={{"sanctum":{}}},
+     *
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"title","description","work_date","work_time","priority","vehicle_id","assigned_to"},
+     *             @OA\Property(property="title", type="string", example="Oil Change"),
+     *             @OA\Property(property="description", type="string", example="Change oil and filter"),
+     *             @OA\Property(property="work_date", type="string", format="date", example="2024-01-15"),
+     *             @OA\Property(property="work_time", type="string", format="time", example="09:00"),
+     *             @OA\Property(property="priority", type="string", enum={"low","medium","high","urgent"}, example="medium"),
+     *             @OA\Property(property="vehicle_id", type="integer", example=1),
+     *             @OA\Property(property="assigned_to", type="integer", example=2),
+     *             @OA\Property(property="due_date", type="string", format="date", example="2024-01-20")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(response=201, description="Task created successfully"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
      */
     public function store(Request $request): JsonResponse
     {
@@ -109,7 +154,18 @@ class TaskController extends Controller
     }
 
     /**
-     * Display the specified task
+     * @OA\Get(
+     *     path="/api/v1/tasks/{id}",
+     *     summary="Get task",
+     *     description="Get a specific task by ID",
+     *     tags={"Tasks"},
+     *     security={{"sanctum":{}}},
+     *
+     *     @OA\Parameter(name="id", in="path", description="Task ID", required=true, @OA\Schema(type="integer")),
+     *
+     *     @OA\Response(response=200, description="Task retrieved successfully"),
+     *     @OA\Response(response=404, description="Task not found")
+     * )
      */
     public function show(Task $task): JsonResponse
     {
@@ -121,7 +177,26 @@ class TaskController extends Controller
     }
 
     /**
-     * Update the specified task
+     * @OA\Put(
+     *     path="/api/v1/tasks/{id}",
+     *     summary="Update task",
+     *     description="Update an existing task",
+     *     tags={"Tasks"},
+     *     security={{"sanctum":{}}},
+     *
+     *     @OA\Parameter(name="id", in="path", description="Task ID", required=true, @OA\Schema(type="integer")),
+     *
+     *     @OA\RequestBody(
+     *         required=false,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="title", type="string", example="Oil Change"),
+     *             @OA\Property(property="description", type="string", example="Change oil and filter"),
+     *             @OA\Property(property="priority", type="string", enum={"low","medium","high","urgent"})
+     *         )
+     *     ),
+     *
+     *     @OA\Response(response=200, description="Task updated successfully")
+     * )
      */
     public function update(Request $request, Task $task): JsonResponse
     {
@@ -159,7 +234,17 @@ class TaskController extends Controller
     }
 
     /**
-     * Remove the specified task
+     * @OA\Delete(
+     *     path="/api/v1/tasks/{id}",
+     *     summary="Delete task",
+     *     description="Delete a task and all associated attachments",
+     *     tags={"Tasks"},
+     *     security={{"sanctum":{}}},
+     *
+     *     @OA\Parameter(name="id", in="path", description="Task ID", required=true, @OA\Schema(type="integer")),
+     *
+     *     @OA\Response(response=200, description="Task deleted successfully")
+     * )
      */
     public function destroy(Task $task): JsonResponse
     {
@@ -174,7 +259,25 @@ class TaskController extends Controller
     }
 
     /**
-     * Assign task to user
+     * @OA\Post(
+     *     path="/api/v1/tasks/{id}/assign",
+     *     summary="Assign task",
+     *     description="Assign a task to a user",
+     *     tags={"Tasks"},
+     *     security={{"sanctum":{}}},
+     *
+     *     @OA\Parameter(name="id", in="path", description="Task ID", required=true, @OA\Schema(type="integer")),
+     *
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"assigned_to"},
+     *             @OA\Property(property="assigned_to", type="integer", example=2)
+     *         )
+     *     ),
+     *
+     *     @OA\Response(response=200, description="Task assigned successfully")
+     * )
      */
     public function assign(Request $request, Task $task): JsonResponse
     {
@@ -196,7 +299,25 @@ class TaskController extends Controller
     }
 
     /**
-     * Update task status
+     * @OA\Put(
+     *     path="/api/v1/tasks/{id}/status",
+     *     summary="Update task status",
+     *     description="Update the status of a task",
+     *     tags={"Tasks"},
+     *     security={{"sanctum":{}}},
+     *
+     *     @OA\Parameter(name="id", in="path", description="Task ID", required=true, @OA\Schema(type="integer")),
+     *
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"status"},
+     *             @OA\Property(property="status", type="string", enum={"pending","running","completed","cancelled"}, example="completed")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(response=200, description="Task status updated successfully")
+     * )
      */
     public function updateStatus(Request $request, Task $task): JsonResponse
     {
@@ -226,7 +347,29 @@ class TaskController extends Controller
     }
 
     /**
-     * Upload attachment for task
+     * @OA\Post(
+     *     path="/api/v1/tasks/{id}/attachments",
+     *     summary="Upload task attachment",
+     *     description="Upload a file attachment for a task",
+     *     tags={"Tasks"},
+     *     security={{"sanctum":{}}},
+     *
+     *     @OA\Parameter(name="id", in="path", description="Task ID", required=true, @OA\Schema(type="integer")),
+     *
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 required={"file"},
+     *                 @OA\Property(property="file", type="string", format="binary"),
+     *                 @OA\Property(property="file_name", type="string", example="document.pdf")
+     *             )
+     *         )
+     *     ),
+     *
+     *     @OA\Response(response=201, description="Attachment uploaded successfully")
+     * )
      */
     public function uploadAttachment(Request $request, Task $task): JsonResponse
     {
@@ -257,7 +400,18 @@ class TaskController extends Controller
     }
 
     /**
-     * Delete attachment from task
+     * @OA\Delete(
+     *     path="/api/v1/tasks/{id}/attachments/{attachment}",
+     *     summary="Delete task attachment",
+     *     description="Delete an attachment from a task",
+     *     tags={"Tasks"},
+     *     security={{"sanctum":{}}},
+     *
+     *     @OA\Parameter(name="id", in="path", description="Task ID", required=true, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="attachment", in="path", description="Attachment ID", required=true, @OA\Schema(type="integer")),
+     *
+     *     @OA\Response(response=200, description="Attachment deleted successfully")
+     * )
      */
     public function deleteAttachment(Task $task, TaskAttachment $attachment): JsonResponse
     {
@@ -272,7 +426,18 @@ class TaskController extends Controller
     }
 
     /**
-     * Get tasks created by current user
+     * @OA\Get(
+     *     path="/api/v1/tasks/my-tasks",
+     *     summary="Get my tasks",
+     *     description="Get tasks created by the current user",
+     *     tags={"Tasks"},
+     *     security={{"sanctum":{}}},
+     *
+     *     @OA\Parameter(name="status", in="query", description="Filter by status", required=false, @OA\Schema(type="string")),
+     *     @OA\Parameter(name="priority", in="query", description="Filter by priority", required=false, @OA\Schema(type="string")),
+     *
+     *     @OA\Response(response=200, description="My tasks retrieved successfully")
+     * )
      */
     public function myTasks(Request $request): JsonResponse
     {
@@ -301,7 +466,18 @@ class TaskController extends Controller
     }
 
     /**
-     * Get tasks assigned to current user
+     * @OA\Get(
+     *     path="/api/v1/tasks/assigned-to-me",
+     *     summary="Get assigned tasks",
+     *     description="Get tasks assigned to the current user",
+     *     tags={"Tasks"},
+     *     security={{"sanctum":{}}},
+     *
+     *     @OA\Parameter(name="status", in="query", description="Filter by status", required=false, @OA\Schema(type="string")),
+     *     @OA\Parameter(name="priority", in="query", description="Filter by priority", required=false, @OA\Schema(type="string")),
+     *
+     *     @OA\Response(response=200, description="Assigned tasks retrieved successfully")
+     * )
      */
     public function assignedToMe(Request $request): JsonResponse
     {

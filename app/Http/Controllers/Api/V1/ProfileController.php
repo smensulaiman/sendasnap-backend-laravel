@@ -9,10 +9,24 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * @OA\Tag(
+ *     name="Profile",
+ *     description="API endpoints for user profile management"
+ * )
+ */
 class ProfileController extends Controller
 {
     /**
-     * Get the authenticated user's profile
+     * @OA\Get(
+     *     path="/api/v1/profile",
+     *     summary="Get profile",
+     *     description="Get the authenticated user's profile",
+     *     tags={"Profile"},
+     *     security={{"sanctum":{}}},
+     *
+     *     @OA\Response(response=200, description="Profile retrieved successfully")
+     * )
      */
     public function show(): JsonResponse
     {
@@ -71,7 +85,26 @@ class ProfileController extends Controller
     }
 
     /**
-     * Update the authenticated user's profile
+     * @OA\Put(
+     *     path="/api/v1/profile",
+     *     summary="Update profile",
+     *     description="Update the authenticated user's profile",
+     *     tags={"Profile"},
+     *     security={{"sanctum":{}}},
+     *
+     *     @OA\RequestBody(
+     *         required=false,
+     *
+     *         @OA\JsonContent(
+     *
+     *             @OA\Property(property="name", type="string", example="John Doe"),
+     *             @OA\Property(property="phone", type="string", example="+1234567890"),
+     *             @OA\Property(property="avatar", type="string", format="binary")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(response=200, description="Profile updated successfully")
+     * )
      */
     public function update(UpdateProfileRequest $request): JsonResponse
     {
@@ -121,7 +154,29 @@ class ProfileController extends Controller
     }
 
     /**
-     * Upload or update profile avatar
+     * @OA\Post(
+     *     path="/api/v1/profile/avatar",
+     *     summary="Upload avatar",
+     *     description="Upload or update profile avatar",
+     *     tags={"Profile"},
+     *     security={{"sanctum":{}}},
+     *
+     *     @OA\RequestBody(
+     *         required=true,
+     *
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *
+     *             @OA\Schema(
+     *                 required={"avatar"},
+     *
+     *                 @OA\Property(property="avatar", type="string", format="binary")
+     *             )
+     *         )
+     *     ),
+     *
+     *     @OA\Response(response=200, description="Avatar uploaded successfully")
+     * )
      */
     public function uploadAvatar(Request $request): JsonResponse
     {
@@ -145,7 +200,15 @@ class ProfileController extends Controller
     }
 
     /**
-     * Remove profile avatar
+     * @OA\Delete(
+     *     path="/api/v1/profile/avatar",
+     *     summary="Remove avatar",
+     *     description="Remove the profile avatar",
+     *     tags={"Profile"},
+     *     security={{"sanctum":{}}},
+     *
+     *     @OA\Response(response=200, description="Avatar removed successfully")
+     * )
      */
     public function removeAvatar(): JsonResponse
     {
@@ -162,7 +225,27 @@ class ProfileController extends Controller
     }
 
     /**
-     * Change password
+     * @OA\Post(
+     *     path="/api/v1/profile/change-password",
+     *     summary="Change password",
+     *     description="Change the authenticated user's password",
+     *     tags={"Profile"},
+     *     security={{"sanctum":{}}},
+     *
+     *     @OA\RequestBody(
+     *         required=true,
+     *
+     *         @OA\JsonContent(
+     *             required={"current_password","password","password_confirmation"},
+     *
+     *             @OA\Property(property="current_password", type="string", format="password"),
+     *             @OA\Property(property="password", type="string", format="password"),
+     *             @OA\Property(property="password_confirmation", type="string", format="password")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(response=200, description="Password changed successfully")
+     * )
      */
     public function changePassword(Request $request): JsonResponse
     {
@@ -188,7 +271,15 @@ class ProfileController extends Controller
     }
 
     /**
-     * Get user's task statistics
+     * @OA\Get(
+     *     path="/api/v1/profile/task-stats",
+     *     summary="Get task statistics",
+     *     description="Get task statistics for the authenticated user",
+     *     tags={"Profile"},
+     *     security={{"sanctum":{}}},
+     *
+     *     @OA\Response(response=200, description="Task statistics retrieved successfully")
+     * )
      */
     public function taskStats(): JsonResponse
     {
