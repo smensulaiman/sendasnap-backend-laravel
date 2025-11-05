@@ -2,16 +2,16 @@
     "openapi": "3.0.0",
     "info": {
         "title": "SendaSnap API",
-        "description": "Vehicle Image and Work Schedule API",
+        "description": "Vehicle Management System API",
         "contact": {
-            "email": "sulaiman@sendajapan.com"
+            "email": "admin@sendasnap.com"
         },
         "version": "1.0.0"
     },
     "servers": [
         {
-            "url": "https://snap.senda.fit",
-            "description": "Production Server"
+            "url": "http://localhost:8000",
+            "description": "Development Server"
         }
     ],
     "paths": {
@@ -59,8 +59,7 @@
                                         "enum": [
                                             "admin",
                                             "manager",
-                                            "employee",
-                                            "client"
+                                            "employee"
                                         ],
                                         "example": "employee"
                                     },
@@ -154,12 +153,12 @@
                                     "email": {
                                         "type": "string",
                                         "format": "email",
-                                        "example": "sulaiman@sendajapan.com"
+                                        "example": "john@example.com"
                                     },
                                     "password": {
                                         "type": "string",
                                         "format": "password",
-                                        "example": "password"
+                                        "example": "password123"
                                     }
                                 },
                                 "type": "object"
@@ -1557,449 +1556,33 @@
                 ]
             }
         },
-        "/api/v1/vehicles": {
-            "get": {
-                "tags": [
-                    "Vehicles"
-                ],
-                "summary": "List vehicles",
-                "description": "Get a paginated list of vehicles with optional filtering",
-                "operationId": "73b535724aa9e0eb6ab36f9dea2af5d9",
-                "parameters": [
-                    {
-                        "name": "search",
-                        "in": "query",
-                        "description": "Search by serial number, make, model, chassis model, or plate number",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "status",
-                        "in": "query",
-                        "description": "Filter by status",
-                        "required": false,
-                        "schema": {
-                            "type": "string",
-                            "enum": [
-                                "pending",
-                                "in_yard",
-                                "ready",
-                                "sold"
-                            ]
-                        }
-                    },
-                    {
-                        "name": "make",
-                        "in": "query",
-                        "description": "Filter by make",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "per_page",
-                        "in": "query",
-                        "description": "Items per page",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "default": 15
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Vehicles retrieved successfully"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            },
-            "post": {
-                "tags": [
-                    "Vehicles"
-                ],
-                "summary": "Create vehicle",
-                "description": "Create a new vehicle with consignee details",
-                "operationId": "97d5b1544d8d0b1bbf78bacb7ff7c9d6",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "serial_number",
-                                    "make",
-                                    "model",
-                                    "chassis_model",
-                                    "cc",
-                                    "year",
-                                    "color",
-                                    "vehicle_buy_date",
-                                    "auction_ship_number",
-                                    "net_weight",
-                                    "area",
-                                    "length",
-                                    "width",
-                                    "height",
-                                    "buying_price",
-                                    "expected_yard_date",
-                                    "consignee_name",
-                                    "consignee_address",
-                                    "consignee_phone",
-                                    "consignee_email"
-                                ],
-                                "properties": {
-                                    "serial_number": {
-                                        "type": "string",
-                                        "example": "SN123456"
-                                    },
-                                    "make": {
-                                        "type": "string",
-                                        "example": "Toyota"
-                                    },
-                                    "model": {
-                                        "type": "string",
-                                        "example": "Camry"
-                                    },
-                                    "chassis_model": {
-                                        "type": "string",
-                                        "example": "CH-123"
-                                    },
-                                    "cc": {
-                                        "type": "integer",
-                                        "example": 2000
-                                    },
-                                    "year": {
-                                        "type": "integer",
-                                        "example": 2020
-                                    },
-                                    "color": {
-                                        "type": "string",
-                                        "example": "Black"
-                                    },
-                                    "vehicle_buy_date": {
-                                        "type": "string",
-                                        "format": "date",
-                                        "example": "2024-01-01"
-                                    },
-                                    "auction_ship_number": {
-                                        "type": "string",
-                                        "example": "SHIP-001"
-                                    },
-                                    "net_weight": {
-                                        "type": "number",
-                                        "example": 1500.5
-                                    },
-                                    "area": {
-                                        "type": "string",
-                                        "example": "Tokyo"
-                                    },
-                                    "length": {
-                                        "type": "number",
-                                        "example": 4.5
-                                    },
-                                    "width": {
-                                        "type": "number",
-                                        "example": 1.8
-                                    },
-                                    "height": {
-                                        "type": "number",
-                                        "example": 1.5
-                                    },
-                                    "plate_number": {
-                                        "type": "string",
-                                        "example": "ABC-123"
-                                    },
-                                    "buying_price": {
-                                        "type": "number",
-                                        "example": 25000
-                                    },
-                                    "expected_yard_date": {
-                                        "type": "string",
-                                        "format": "date",
-                                        "example": "2024-02-01"
-                                    },
-                                    "consignee_name": {
-                                        "type": "string",
-                                        "example": "John Doe"
-                                    },
-                                    "consignee_address": {
-                                        "type": "string",
-                                        "example": "123 Main St"
-                                    },
-                                    "consignee_phone": {
-                                        "type": "string",
-                                        "example": "+1234567890"
-                                    },
-                                    "consignee_email": {
-                                        "type": "string",
-                                        "format": "email",
-                                        "example": "john@example.com"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "Vehicle created successfully"
-                    },
-                    "422": {
-                        "description": "Validation error"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/api/v1/vehicles/{id}": {
-            "get": {
-                "tags": [
-                    "Vehicles"
-                ],
-                "summary": "Get vehicle",
-                "description": "Get a specific vehicle by ID",
-                "operationId": "3f9cfe137c4a5c2f8d0cebf4df782777",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "Vehicle ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Vehicle retrieved successfully"
-                    },
-                    "404": {
-                        "description": "Vehicle not found"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            },
-            "put": {
-                "tags": [
-                    "Vehicles"
-                ],
-                "summary": "Update vehicle",
-                "description": "Update an existing vehicle",
-                "operationId": "0897d5c6eef35da2391215989a66bd71",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "Vehicle ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "required": false,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "serial_number": {
-                                        "type": "string",
-                                        "example": "SN123456"
-                                    },
-                                    "make": {
-                                        "type": "string",
-                                        "example": "Toyota"
-                                    },
-                                    "status": {
-                                        "type": "string",
-                                        "enum": [
-                                            "pending",
-                                            "in_yard",
-                                            "ready",
-                                            "sold"
-                                        ]
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Vehicle updated successfully"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            },
-            "delete": {
-                "tags": [
-                    "Vehicles"
-                ],
-                "summary": "Delete vehicle",
-                "description": "Delete a vehicle and all associated files",
-                "operationId": "8769e23b1fc248d1396ef30e6fde8093",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "Vehicle ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Vehicle deleted successfully"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/api/v1/vehicles/{id}/photos": {
-            "post": {
-                "tags": [
-                    "Vehicles"
-                ],
-                "summary": "Upload vehicle photo",
-                "description": "Upload a photo for a vehicle",
-                "operationId": "ab9c0d2c7c3a857297d794df7d255300",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "Vehicle ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "multipart/form-data": {
-                            "schema": {
-                                "required": [
-                                    "photo",
-                                    "photo_type"
-                                ],
-                                "properties": {
-                                    "photo": {
-                                        "type": "string",
-                                        "format": "binary"
-                                    },
-                                    "photo_type": {
-                                        "type": "string",
-                                        "enum": [
-                                            "exterior",
-                                            "interior",
-                                            "engine",
-                                            "document",
-                                            "other"
-                                        ]
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "Photo uploaded successfully"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/api/v1/vehicles/{id}/photos/{photo}": {
-            "delete": {
-                "tags": [
-                    "Vehicles"
-                ],
-                "summary": "Delete vehicle photo",
-                "description": "Delete a photo from a vehicle",
-                "operationId": "d279b385f5388a4b13423157436bc51f",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "Vehicle ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "name": "photo",
-                        "in": "path",
-                        "description": "Photo ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Photo deleted successfully"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
         "/api/v1/vehicles/search": {
             "get": {
                 "tags": [
                     "Vehicles"
                 ],
-                "summary": "Search vehicles",
-                "description": "Search vehicles by query string",
+                "summary": "Search vehicles (external DB)",
+                "description": "Searches external vehicle database using header inputs",
                 "operationId": "e62ddf990d7c6b316edddc67b5a7fe0d",
                 "parameters": [
                     {
-                        "name": "q",
-                        "in": "query",
-                        "description": "Search query",
-                        "required": false,
+                        "name": "search_type",
+                        "in": "header",
+                        "description": "Type of identifier (vehicle_id or veh_chassis_number)",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "vehicle_id",
+                                "veh_chassis_number"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "search_query",
+                        "in": "header",
+                        "description": "Value of the identifier to search",
+                        "required": true,
                         "schema": {
                             "type": "string"
                         }
@@ -2008,26 +1591,6 @@
                 "responses": {
                     "200": {
                         "description": "Search completed"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/api/v1/vehicles/stats": {
-            "get": {
-                "tags": [
-                    "Vehicles"
-                ],
-                "summary": "Get vehicle statistics",
-                "description": "Get statistics about vehicles",
-                "operationId": "cdd973cf65bd35022ba051b195f2c1fa",
-                "responses": {
-                    "200": {
-                        "description": "Statistics retrieved successfully"
                     }
                 },
                 "security": [

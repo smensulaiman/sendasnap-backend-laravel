@@ -43,6 +43,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/vehicles', [DashboardController::class, 'vehicles'])->name('dashboard.vehicles');
     Route::get('/dashboard/vehicles/{vehicle}', [DashboardController::class, 'showVehicle'])->name('dashboard.vehicles.show');
+    // Web JSON search endpoint (uses external DB) via query params
+    Route::get('/vehicles/search', [\App\Http\Controllers\Web\VehicleController::class, 'search'])->name('vehicles.search');
     // Tasks page (beautiful pastel design)
     Route::get('/dashboard/tasks', [DashboardController::class, 'tasks'])->name('dashboard.tasks');
     Route::get('/dashboard/users', [DashboardController::class, 'users'])->name('dashboard.users');
