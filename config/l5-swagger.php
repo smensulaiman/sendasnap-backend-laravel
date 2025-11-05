@@ -312,7 +312,8 @@ return [
          * Constants which can be used in annotations
          */
         'constants' => [
-            'L5_SWAGGER_CONST_HOST' => env('L5_SWAGGER_CONST_HOST', 'http://my-default-host.com'),
+            // Use APP_URL so @OA\Server can reference L5_SWAGGER_CONST_HOST dynamically
+            'L5_SWAGGER_CONST_HOST' => config('app.url'),
         ],
     ],
 ];

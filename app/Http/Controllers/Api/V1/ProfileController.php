@@ -314,7 +314,7 @@ class ProfileController extends Controller
     /**
      * Success response helper
      */
-    private function successResponse(string $message, array $data = [], int $status = 200): JsonResponse
+    protected function successResponse(string $message, array $data = [], int $status = 200): JsonResponse
     {
         return response()->json([
             'success' => true,
@@ -329,7 +329,7 @@ class ProfileController extends Controller
     /**
      * Error response helper
      */
-    private function errorResponse(string $message, array $errors = [], int $status = 400): JsonResponse
+    protected function errorResponse(string $message, array $errors = [], int $status = 400): JsonResponse
     {
         return response()->json([
             'success' => false,

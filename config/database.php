@@ -16,7 +16,7 @@ return [
     |
     */
 
-    'default' => env('DB_CONNECTION', 'sqlite'),
+    'default' => env('DB_CONNECTION', 'mysql'),
 
     /*
     |--------------------------------------------------------------------------
@@ -65,7 +65,7 @@ return [
 
         // External remote MySQL for vehicle lookups
         'external_mysql' => [
-            'driver' => 'mysql',
+            'driver' => 'mariadb',
             'url' => env('REMOTE_DB_URL'),
             'host' => env('REMOTE_DB_HOST', '192.168.0.99'),
             'port' => env('REMOTE_DB_PORT', '3306'),

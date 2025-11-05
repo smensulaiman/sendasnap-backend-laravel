@@ -1,8 +1,6 @@
 <?php
 
-use App\Models\User;
 use Illuminate\Support\Facades\DB;
-use Laravel\Sanctum\Sanctum;
 
 function externalDbReady(): bool
 {
@@ -30,10 +28,6 @@ it('searches vehicle by vehicle_id from external DB', function () {
     if (! externalDbReady()) {
         test()->markTestSkipped('External DB environment variables not configured.');
     }
-
-    // Authenticate via Sanctum
-    $user = User::factory()->create();
-    Sanctum::actingAs($user);
 
     $response = test()->getJson('/api/v1/vehicles/search', [
         'Authorization' => 'Bearer dummy',

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Services\ExternalVehicleService;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -26,7 +27,7 @@ class VehicleController extends Controller
      *
      *     @OA\Parameter(
      *         name="search_type",
-     *         in="header",
+     *         in="query",
      *         description="Type of identifier (vehicle_id or veh_chassis_number)",
      *         required=true,
      *
@@ -35,8 +36,8 @@ class VehicleController extends Controller
      *
      *     @OA\Parameter(
      *         name="search_query",
-     *         in="header",
-     *         description="Value of the identifier to search",
+     *         in="query",
+     *         description="Value of the identifier to search, example 251144",
      *         required=true,
      *
      *         @OA\Schema(type="string")
@@ -50,9 +51,10 @@ class VehicleController extends Controller
      */
     public function search(Request $request): JsonResponse
     {
+        // Accept only query parameters for input
         $input = [
-            'search_type' => $request->header('search_type'),
-            'search_query' => $request->header('search_query'),
+            'search_type' => $request->query('search_type'),
+            'search_query' => $request->query('search_query'),
         ];
 
         $validator = Validator::make($input, [
@@ -70,13 +72,26 @@ class VehicleController extends Controller
 
         $service = new ExternalVehicleService;
 
-        $results = $service->getVehicleDetails(
-            (string) $input['search_type'],
-            (string) $input['search_query']
-        );
+        try {
+            $results = $service->getVehicleDetails(
+                (string) $input['search_type'],
+                (string) $input['search_query']
+            );
 
-        return $this->successResponse('Search completed', [
-            'vehicles' => $results,
-        ]);
+            return $this->successResponse('Search completed', [
+                'vehicles' => $results,
+            ]);
+        } catch (QueryException $e) {
+            return $this->errorResponse('External database query failed', [
+                'sql' => method_exists($e, 'getSql') ? $e->getSql() : null,
+                'bindings' => method_exists($e, 'getBindings') ? $e->getBindings() : [],
+                'error' => $e->getMessage(),
+            ], 502);
+        } catch (\Throwable $e) {
+            return $this->errorResponse('External database error', [
+                'error' => $e->getMessage(),
+                'exception' => get_class($e),
+            ], 502);
+        }
     }
 }

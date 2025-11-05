@@ -82,7 +82,7 @@ class AuthController extends Controller
         if ($validator->fails()) {
             $messages = implode(' ', $validator->errors()->all());
 
-            return $this->errorResponse($messages ?: 'Validation failed', $validator->errors(), 422);
+            return $this->errorResponse($messages ?: 'Validation failed', $validator->errors()->toArray(), 422);
         }
 
         $user = User::create([
@@ -114,8 +114,8 @@ class AuthController extends Controller
      *         @OA\JsonContent(
      *             required={"email","password"},
      *
-     *             @OA\Property(property="email", type="string", format="email", example="john@example.com"),
-     *             @OA\Property(property="password", type="string", format="password", example="password123")
+     *             @OA\Property(property="email", type="string", format="email", example="sulaiman@sendasnap.com"),
+     *             @OA\Property(property="password", type="string", format="password", example="password")
      *         )
      *     ),
      *
@@ -172,7 +172,7 @@ class AuthController extends Controller
         if ($validator->fails()) {
             $messages = implode(' ', $validator->errors()->all());
 
-            return $this->errorResponse($messages ?: 'Validation failed', $validator->errors(), 422);
+            return $this->errorResponse($messages ?: 'Validation failed', $validator->errors()->toArray(), 422);
         }
 
         try {
@@ -282,7 +282,7 @@ class AuthController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return $this->errorResponse('Validation failed', $validator->errors(), 422);
+            return $this->errorResponse('Validation failed', $validator->errors()->toArray(), 422);
         }
 
         $user = $request->user();
@@ -344,7 +344,7 @@ class AuthController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return $this->errorResponse('Validation failed', $validator->errors(), 422);
+            return $this->errorResponse('Validation failed', $validator->errors()->toArray(), 422);
         }
 
         $user = $request->user();
@@ -396,7 +396,7 @@ class AuthController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return $this->errorResponse('Validation failed', $validator->errors(), 422);
+            return $this->errorResponse('Validation failed', $validator->errors()->toArray(), 422);
         }
 
         $status = Password::sendResetLink($request->only('email'));
@@ -466,35 +466,5 @@ class AuthController extends Controller
         }
 
         return $this->errorResponse('Unable to reset password', [], 400);
-    }
-
-    /**
-     * Success response helper
-     */
-    private function successResponse(string $message, array $data = [], int $status = 200): JsonResponse
-    {
-        return response()->json([
-            'success' => true,
-            'message' => $message,
-            'data' => $data,
-            'meta' => [
-                'timestamp' => now()->toISOString(),
-            ],
-        ], $status);
-    }
-
-    /**
-     * Error response helper
-     */
-    private function errorResponse(string $message, array $errors = [], int $status = 400): JsonResponse
-    {
-        return response()->json([
-            'success' => false,
-            'message' => $message,
-            'errors' => $errors,
-            'meta' => [
-                'timestamp' => now()->toISOString(),
-            ],
-        ], $status);
     }
 }

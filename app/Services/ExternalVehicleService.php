@@ -8,6 +8,23 @@ use Illuminate\Support\Facades\Log;
 
 class ExternalVehicleService
 {
+    private function buildWhereClause(string $searchType, string $searchQuery): array
+    {
+        $allowed = [
+            'vehicle_id' => 'vehicle.vehicle_id',
+            'veh_chassis_number' => 'vehicle.veh_chassis_number',
+        ];
+
+        $key = strtolower($searchType);
+        if (! array_key_exists($key, $allowed)) {
+            $key = 'veh_chassis_number';
+        }
+
+        $column = $allowed[$key];
+
+        return ["{$column} = ?", [$searchQuery]];
+    }
+
     public function getVehicleDetails(string $searchType, string $searchQuery): array
     {
         [$where, $bindings] = $this->buildWhereClause($searchType, $searchQuery);
@@ -48,7 +65,6 @@ class ExternalVehicleService
         try {
             $rows = DB::connection('external_mysql')->select($sql, $bindings);
 
-            // Normalize to plain arrays
             return array_map(fn ($r) => (array) $r, $rows);
         } catch (QueryException $e) {
             Log::error('ExternalVehicleService query failed', [
@@ -56,23 +72,5 @@ class ExternalVehicleService
             ]);
             throw $e;
         }
-    }
-
-    private function buildWhereClause(string $searchType, string $searchQuery): array
-    {
-        $allowed = [
-            'vehicle_id' => 'vehicle.vehicle_id',
-            'veh_chassis_number' => 'vehicle.veh_chassis_number',
-        ];
-
-        $key = strtolower($searchType);
-        if (! array_key_exists($key, $allowed)) {
-            // Fallback to chassis number if invalid
-            $key = 'veh_chassis_number';
-        }
-
-        $column = $allowed[$key];
-
-        return ["{$column} = ?", [$searchQuery]];
     }
 }

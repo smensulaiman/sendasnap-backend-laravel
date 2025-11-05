@@ -2,7 +2,7 @@
     "openapi": "3.0.0",
     "info": {
         "title": "SendaSnap API",
-        "description": "Vehicle Management System API",
+        "description": "Vehicle photo upload and workflow management system",
         "contact": {
             "email": "admin@sendasnap.com"
         },
@@ -10,7 +10,7 @@
     },
     "servers": [
         {
-            "url": "http://localhost:8000",
+            "url": "https://sendasnap-backend-laravel.test",
             "description": "Development Server"
         }
     ],
@@ -153,12 +153,12 @@
                                     "email": {
                                         "type": "string",
                                         "format": "email",
-                                        "example": "john@example.com"
+                                        "example": "sulaiman@sendasnap.com"
                                     },
                                     "password": {
                                         "type": "string",
                                         "format": "password",
-                                        "example": "password123"
+                                        "example": "password"
                                     }
                                 },
                                 "type": "object"
@@ -1561,13 +1561,13 @@
                 "tags": [
                     "Vehicles"
                 ],
-                "summary": "Search vehicles (external DB)",
+                "summary": "Search vehicles (senda.us avis_03_oct table)",
                 "description": "Searches external vehicle database using header inputs",
                 "operationId": "e62ddf990d7c6b316edddc67b5a7fe0d",
                 "parameters": [
                     {
                         "name": "search_type",
-                        "in": "header",
+                        "in": "query",
                         "description": "Type of identifier (vehicle_id or veh_chassis_number)",
                         "required": true,
                         "schema": {
@@ -1580,8 +1580,8 @@
                     },
                     {
                         "name": "search_query",
-                        "in": "header",
-                        "description": "Value of the identifier to search",
+                        "in": "query",
+                        "description": "Value of the identifier to search, example 251144",
                         "required": true,
                         "schema": {
                             "type": "string"

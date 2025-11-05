@@ -73,8 +73,10 @@ class UserController extends Controller
      *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
      *             required={"name","email","password","password_confirmation","role"},
+     *
      *             @OA\Property(property="name", type="string", example="John Doe"),
      *             @OA\Property(property="email", type="string", format="email", example="john@example.com"),
      *             @OA\Property(property="password", type="string", format="password", example="password123"),
@@ -179,7 +181,9 @@ class UserController extends Controller
      *
      *     @OA\RequestBody(
      *         required=false,
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="name", type="string", example="John Doe"),
      *             @OA\Property(property="email", type="string", format="email", example="john@example.com"),
      *             @OA\Property(property="role", type="string", enum={"admin","manager","employee","client"})
@@ -255,8 +259,10 @@ class UserController extends Controller
      *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
      *             required={"role"},
+     *
      *             @OA\Property(property="role", type="string", enum={"admin","manager","employee","client"}, example="manager")
      *         )
      *     ),
@@ -284,7 +290,7 @@ class UserController extends Controller
     /**
      * Success response helper
      */
-    private function successResponse(string $message, array $data = [], int $status = 200): JsonResponse
+    protected function successResponse(string $message, array $data = [], int $status = 200): JsonResponse
     {
         return response()->json([
             'success' => true,
@@ -299,7 +305,7 @@ class UserController extends Controller
     /**
      * Error response helper
      */
-    private function errorResponse(string $message, array $errors = [], int $status = 400): JsonResponse
+    protected function errorResponse(string $message, array $errors = [], int $status = 400): JsonResponse
     {
         return response()->json([
             'success' => false,

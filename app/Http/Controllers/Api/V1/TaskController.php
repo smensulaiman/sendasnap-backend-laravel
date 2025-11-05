@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Models\Task;
 use App\Models\TaskAttachment;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
@@ -100,8 +100,10 @@ class TaskController extends Controller
      *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
      *             required={"title","description","work_date","work_time","priority","vehicle_id","assigned_to"},
+     *
      *             @OA\Property(property="title", type="string", example="Oil Change"),
      *             @OA\Property(property="description", type="string", example="Change oil and filter"),
      *             @OA\Property(property="work_date", type="string", format="date", example="2024-01-15"),
@@ -188,7 +190,9 @@ class TaskController extends Controller
      *
      *     @OA\RequestBody(
      *         required=false,
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="title", type="string", example="Oil Change"),
      *             @OA\Property(property="description", type="string", example="Change oil and filter"),
      *             @OA\Property(property="priority", type="string", enum={"low","medium","high","urgent"})
@@ -223,7 +227,7 @@ class TaskController extends Controller
             'priority',
             'vehicle_id',
             'assigned_to',
-            'due_date'
+            'due_date',
         ]));
 
         $task->load(['vehicle', 'assignedUser', 'creator', 'attachments']);
@@ -270,8 +274,10 @@ class TaskController extends Controller
      *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
      *             required={"assigned_to"},
+     *
      *             @OA\Property(property="assigned_to", type="integer", example=2)
      *         )
      *     ),
@@ -310,8 +316,10 @@ class TaskController extends Controller
      *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
      *             required={"status"},
+     *
      *             @OA\Property(property="status", type="string", enum={"pending","running","completed","cancelled"}, example="completed")
      *         )
      *     ),
@@ -358,10 +366,13 @@ class TaskController extends Controller
      *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\MediaType(
      *             mediaType="multipart/form-data",
+     *
      *             @OA\Schema(
      *                 required={"file"},
+     *
      *                 @OA\Property(property="file", type="string", format="binary"),
      *                 @OA\Property(property="file_name", type="string", example="document.pdf")
      *             )
@@ -508,7 +519,7 @@ class TaskController extends Controller
     /**
      * Success response helper
      */
-    private function successResponse(string $message, array $data = [], int $status = 200): JsonResponse
+    protected function successResponse(string $message, array $data = [], int $status = 200): JsonResponse
     {
         return response()->json([
             'success' => true,
@@ -523,7 +534,7 @@ class TaskController extends Controller
     /**
      * Error response helper
      */
-    private function errorResponse(string $message, array $errors = [], int $status = 400): JsonResponse
+    protected function errorResponse(string $message, array $errors = [], int $status = 400): JsonResponse
     {
         return response()->json([
             'success' => false,

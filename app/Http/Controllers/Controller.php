@@ -11,7 +11,7 @@ use Illuminate\Routing\Controller as BaseController;
  * @OA\Info(
  *     title="SendaSnap API",
  *     version="1.0.0",
- *     description="Vehicle Management System API",
+ *     description="Vehicle photo upload and workflow management system",
  *
  *     @OA\Contact(
  *         email="admin@sendasnap.com"
@@ -19,7 +19,7 @@ use Illuminate\Routing\Controller as BaseController;
  * )
  *
  * @OA\Server(
- *     url="http://localhost:8000",
+ *     url=L5_SWAGGER_CONST_HOST,
  *     description="Development Server"
  * )
  *
