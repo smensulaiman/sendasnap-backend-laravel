@@ -3,7 +3,7 @@
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\ProfileController;
 use App\Http\Controllers\Api\V1\TaskController;
-use App\Http\Controllers\Api\V1\MembersController;
+use App\Http\Controllers\Api\V1\UsersController;
 use App\Http\Controllers\Api\V1\VehicleController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -42,19 +42,8 @@ Route::prefix('v1')->group(function () {
     // Protected Routes
     Route::middleware('auth:sanctum')->group(function () {
 
-        // Managers: limited capabilities (define BEFORE admin to avoid route shadowing)
-        Route::middleware('role:manager')->group(function () {
-            // Managers can index and show users, update limited fields, and create employees
-            Route::get('users', [MembersController::class, 'index']);
-            Route::get('users/{user}', [MembersController::class, 'show']);
-            Route::put('users/{user}', [MembersController::class, 'update']);
-            Route::post('employees', [MembersController::class, 'storeEmployee']);
-        });
-        // User Management Routes - Admin full CRUD
-        Route::middleware('role:admin')->group(function () {
-            Route::apiResource('users', MembersController::class);
-            Route::post('users/{user}/assign-role', [MembersController::class, 'assignRole']);
-        });
+        // Users Route - accessible to all authenticated users
+        Route::get('users', [UsersController::class, 'index']);
 
         // Vehicle Management Routes
         Route::get('vehicles/search', [VehicleController::class, 'search']);

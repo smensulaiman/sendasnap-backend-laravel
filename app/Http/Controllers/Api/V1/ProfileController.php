@@ -264,34 +264,4 @@ class ProfileController extends Controller
 
         return $this->successResponse('Task statistics retrieved successfully', $stats);
     }
-
-    /**
-     * Success response helper
-     */
-    protected function successResponse(string $message, array $data = [], int $status = 200): JsonResponse
-    {
-        return response()->json([
-            'success' => true,
-            'message' => $message,
-            'data' => $data,
-            'meta' => [
-                'timestamp' => now()->toISOString(),
-            ],
-        ], $status);
-    }
-
-    /**
-     * Error response helper
-     */
-    protected function errorResponse(string $message, array $errors = [], int $status = 400): JsonResponse
-    {
-        return response()->json([
-            'success' => false,
-            'message' => $message,
-            'errors' => $errors,
-            'meta' => [
-                'timestamp' => now()->toISOString(),
-            ],
-        ], $status);
-    }
 }

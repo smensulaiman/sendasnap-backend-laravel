@@ -64,14 +64,10 @@ class VehicleController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation failed',
-                'errors' => $validator->errors()->toArray(),
-            ], 422);
+            return $this->errorResponse('Validation failed', $validator->errors()->toArray(), 422);
         }
 
-        // Get authenticated user (works with bearer token from Android/iOS/any client)
+        // Get the user infor
         $user = $request->user();
 
         // Detect if request is from Android device
