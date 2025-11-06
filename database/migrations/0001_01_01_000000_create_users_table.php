@@ -19,6 +19,7 @@ return new class extends Migration {
             $table->enum('role', ['admin', 'manager', 'employee', 'client'])->default('client');
             $table->string('phone')->nullable();
             $table->string('avatar')->nullable();
+            $table->string('avis_id')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });
