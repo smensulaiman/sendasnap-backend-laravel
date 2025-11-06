@@ -7,6 +7,7 @@ use App\Services\ExternalVehicleService;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 /**
@@ -70,6 +71,27 @@ class VehicleController extends Controller
             ], 422);
         }
 
+        // Get authenticated user (works with bearer token from Android/iOS/any client)
+        $user = $request->user();
+
+        // Detect if request is from Android device
+        $userAgent = $request->userAgent() ?? '';
+        $isAndroid = stripos($userAgent, 'Android') !== false;
+
+        // Log API request with user and device information
+        Log::info('Vehicle Search API Request', [
+            'user_id' => $user?->id,
+            'user_email' => $user?->email,
+            'user_name' => $user?->name,
+            'is_android' => $isAndroid,
+            'user_agent' => $userAgent,
+            'ip_address' => $request->ip(),
+            'search_type' => $input['search_type'],
+            'search_query' => $input['search_query'],
+            'url' => $request->fullUrl(),
+            'method' => $request->method(),
+        ]);
+
         $service = new ExternalVehicleService;
 
         try {
@@ -78,16 +100,41 @@ class VehicleController extends Controller
                 (string) $input['search_query']
             );
 
+            Log::info('Vehicle Search API Success', [
+                'user_id' => $user?->id,
+                'is_android' => $isAndroid,
+                'results_count' => is_array($results) ? count($results) : 0,
+                'search_type' => $input['search_type'],
+                'search_query' => $input['search_query'],
+            ]);
+
             return $this->successResponse('Search completed', [
                 'vehicles' => $results,
             ]);
         } catch (QueryException $e) {
+            Log::error('Vehicle Search API - Database Query Error', [
+                'user_id' => $user?->id,
+                'is_android' => $isAndroid,
+                'error' => $e->getMessage(),
+                'search_type' => $input['search_type'],
+                'search_query' => $input['search_query'],
+            ]);
+
             return $this->errorResponse('External database query failed', [
                 'sql' => method_exists($e, 'getSql') ? $e->getSql() : null,
                 'bindings' => method_exists($e, 'getBindings') ? $e->getBindings() : [],
                 'error' => $e->getMessage(),
             ], 502);
         } catch (\Throwable $e) {
+            Log::error('Vehicle Search API - General Error', [
+                'user_id' => $user?->id,
+                'is_android' => $isAndroid,
+                'error' => $e->getMessage(),
+                'exception' => get_class($e),
+                'search_type' => $input['search_type'],
+                'search_query' => $input['search_query'],
+            ]);
+
             return $this->errorResponse('External database error', [
                 'error' => $e->getMessage(),
                 'exception' => get_class($e),
