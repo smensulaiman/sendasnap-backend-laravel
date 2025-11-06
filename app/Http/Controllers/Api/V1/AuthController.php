@@ -19,56 +19,6 @@ use Illuminate\Support\Facades\Validator;
  */
 class AuthController extends Controller
 {
-    /**
-     * @OA\Post(
-     *     path="/api/v1/auth/register",
-     *     summary="Register a new user",
-     *     description="Create a new user account",
-     *     tags={"Authentication"},
-     *
-     *     @OA\RequestBody(
-     *         required=true,
-     *
-     *         @OA\JsonContent(
-     *             required={"name","email","password","password_confirmation"},
-     *
-     *             @OA\Property(property="name", type="string", example="Mohammad Sulaiman"),
-     *             @OA\Property(property="email", type="string", format="email", example="sulaiman@sendajapan.com"),
-     *             @OA\Property(property="password", type="string", format="password", example="password"),
-     *             @OA\Property(property="password_confirmation", type="string", format="password", example="password"),
-     *             @OA\Property(property="role", type="string", enum={"admin","manager","employee"}, example="employee"),
-     *             @OA\Property(property="phone", type="string", example="+819019735910")
-     *         )
-     *     ),
-     *
-     *     @OA\Response(
-     *         response=200,
-     *         description="User registered successfully",
-     *
-     *         @OA\JsonContent(
-     *
-     *             @OA\Property(property="success", type="boolean", example=true),
-     *             @OA\Property(property="message", type="string", example="User registered successfully"),
-     *             @OA\Property(property="data", type="object",
-     *                 @OA\Property(property="user", type="object"),
-     *                 @OA\Property(property="token", type="string", example="1|abc123...")
-     *             )
-     *         )
-     *     ),
-     *
-     *     @OA\Response(
-     *         response=422,
-     *         description="Validation error",
-     *
-     *         @OA\JsonContent(
-     *
-     *             @OA\Property(property="success", type="boolean", example=false),
-     *             @OA\Property(property="message", type="string", example="Validation failed"),
-     *             @OA\Property(property="errors", type="object")
-     *         )
-     *     )
-     * )
-     */
     public function register(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
