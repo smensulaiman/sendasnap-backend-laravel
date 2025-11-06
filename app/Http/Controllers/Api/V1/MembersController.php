@@ -149,19 +149,6 @@ class MembersController extends Controller
         ], 201);
     }
 
-    /**
-     * @OA\Get(
-     *     path="/api/v1/users/{id}",
-     *     summary="Get user",
-     *     description="Get a specific user by ID",
-     *     tags={"Users"},
-     *     security={{"sanctum":{}}},
-     *
-     *     @OA\Parameter(name="id", in="path", description="User ID", required=true, @OA\Schema(type="integer")),
-     *
-     *     @OA\Response(response=200, description="User retrieved successfully")
-     * )
-     */
     public function show(User $user): JsonResponse
     {
         return $this->successResponse('User retrieved successfully', [
@@ -198,19 +185,6 @@ class MembersController extends Controller
         ]);
     }
 
-    /**
-     * @OA\Delete(
-     *     path="/api/v1/users/{id}",
-     *     summary="Delete user",
-     *     description="Delete a user (Admin only)",
-     *     tags={"Users"},
-     *     security={{"sanctum":{}}},
-     *
-     *     @OA\Parameter(name="id", in="path", description="User ID", required=true, @OA\Schema(type="integer")),
-     *
-     *     @OA\Response(response=200, description="User deleted successfully")
-     * )
-     */
     public function destroy(User $user): JsonResponse
     {
         // Prevent deletion of the last admin
@@ -223,29 +197,6 @@ class MembersController extends Controller
         return $this->successResponse('User deleted successfully');
     }
 
-    /**
-     * @OA\Post(
-     *     path="/api/v1/users/{id}/assign-role",
-     *     summary="Assign role to user",
-     *     description="Assign a role to a user (Admin only)",
-     *     tags={"Users"},
-     *     security={{"sanctum":{}}},
-     *
-     *     @OA\Parameter(name="id", in="path", description="User ID", required=true, @OA\Schema(type="integer")),
-     *
-     *     @OA\RequestBody(
-     *         required=true,
-     *
-     *         @OA\JsonContent(
-     *             required={"role"},
-     *
-     *             @OA\Property(property="role", type="string", enum={"admin","manager","employee","client"}, example="manager")
-     *         )
-     *     ),
-     *
-     *     @OA\Response(response=200, description="Role assigned successfully")
-     * )
-     */
     public function assignRole(Request $request, User $user): JsonResponse
     {
         $validator = Validator::make($request->all(), [
