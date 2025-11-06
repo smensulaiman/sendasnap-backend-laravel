@@ -195,31 +195,6 @@ class AuthController extends Controller
         }
     }
 
-    /**
-     * @OA\Post(
-     *     path="/api/v1/auth/logout",
-     *     summary="Logout user",
-     *     description="Revoke the current access token",
-     *     tags={"Authentication"},
-     *     security={{"sanctum":{}}},
-     *
-     *     @OA\Response(
-     *         response=200,
-     *         description="Logout successful",
-     *
-     *         @OA\JsonContent(
-     *
-     *             @OA\Property(property="success", type="boolean", example=true),
-     *             @OA\Property(property="message", type="string", example="Logout successful")
-     *         )
-     *     ),
-     *
-     *     @OA\Response(
-     *         response=401,
-     *         description="Unauthenticated"
-     *     )
-     * )
-     */
     public function logout(Request $request): JsonResponse
     {
         $request->user()->currentAccessToken()->delete();
@@ -227,34 +202,6 @@ class AuthController extends Controller
         return $this->successResponse('Logout successful');
     }
 
-    /**
-     * @OA\Post(
-     *     path="/api/v1/auth/refresh",
-     *     summary="Refresh token",
-     *     description="Generate a new access token and revoke the old one",
-     *     tags={"Authentication"},
-     *     security={{"sanctum":{}}},
-     *
-     *     @OA\Response(
-     *         response=200,
-     *         description="Token refreshed successfully",
-     *
-     *         @OA\JsonContent(
-     *
-     *             @OA\Property(property="success", type="boolean", example=true),
-     *             @OA\Property(property="message", type="string", example="Token refreshed successfully"),
-     *             @OA\Property(property="data", type="object",
-     *                 @OA\Property(property="token", type="string", example="1|abc123...")
-     *             )
-     *         )
-     *     ),
-     *
-     *     @OA\Response(
-     *         response=401,
-     *         description="Unauthenticated"
-     *     )
-     * )
-     */
     public function refresh(Request $request): JsonResponse
     {
         $user = $request->user();
@@ -360,35 +307,6 @@ class AuthController extends Controller
         return $this->successResponse('Password changed successfully');
     }
 
-    /**
-     * @OA\Post(
-     *     path="/api/v1/auth/forgot-password",
-     *     summary="Send password reset link",
-     *     description="Send a password reset link to the user's email",
-     *     tags={"Authentication"},
-     *
-     *     @OA\RequestBody(
-     *         required=true,
-     *
-     *         @OA\JsonContent(
-     *             required={"email"},
-     *
-     *             @OA\Property(property="email", type="string", format="email", example="john@example.com")
-     *         )
-     *     ),
-     *
-     *     @OA\Response(
-     *         response=200,
-     *         description="Password reset link sent",
-     *
-     *         @OA\JsonContent(
-     *
-     *             @OA\Property(property="success", type="boolean", example=true),
-     *             @OA\Property(property="message", type="string", example="Password reset link sent to your email")
-     *         )
-     *     )
-     * )
-     */
     public function forgotPassword(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
@@ -408,38 +326,6 @@ class AuthController extends Controller
         return $this->errorResponse('Unable to send password reset link', [], 400);
     }
 
-    /**
-     * @OA\Post(
-     *     path="/api/v1/auth/reset-password",
-     *     summary="Reset password",
-     *     description="Reset user password using the reset token",
-     *     tags={"Authentication"},
-     *
-     *     @OA\RequestBody(
-     *         required=true,
-     *
-     *         @OA\JsonContent(
-     *             required={"token","email","password","password_confirmation"},
-     *
-     *             @OA\Property(property="token", type="string", example="reset-token-here"),
-     *             @OA\Property(property="email", type="string", format="email", example="john@example.com"),
-     *             @OA\Property(property="password", type="string", format="password", example="newpassword123"),
-     *             @OA\Property(property="password_confirmation", type="string", format="password", example="newpassword123")
-     *         )
-     *     ),
-     *
-     *     @OA\Response(
-     *         response=200,
-     *         description="Password reset successfully",
-     *
-     *         @OA\JsonContent(
-     *
-     *             @OA\Property(property="success", type="boolean", example=true),
-     *             @OA\Property(property="message", type="string", example="Password reset successfully")
-     *         )
-     *     )
-     * )
-     */
     public function resetPassword(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [

@@ -11,11 +11,11 @@ use Illuminate\Support\Facades\Validator;
 
 /**
  * @OA\Tag(
- *     name="Users",
- *     description="API endpoints for user management"
+ *     name="Members",
+ *     description="API endpoints for member data fetch management"
  * )
  */
-class UserController extends Controller
+class MembersController extends Controller
 {
     /**
      * @OA\Get(
@@ -169,30 +169,6 @@ class UserController extends Controller
         ]);
     }
 
-    /**
-     * @OA\Put(
-     *     path="/api/v1/users/{id}",
-     *     summary="Update user",
-     *     description="Update an existing user",
-     *     tags={"Users"},
-     *     security={{"sanctum":{}}},
-     *
-     *     @OA\Parameter(name="id", in="path", description="User ID", required=true, @OA\Schema(type="integer")),
-     *
-     *     @OA\RequestBody(
-     *         required=false,
-     *
-     *         @OA\JsonContent(
-     *
-     *             @OA\Property(property="name", type="string", example="John Doe"),
-     *             @OA\Property(property="email", type="string", format="email", example="john@example.com"),
-     *             @OA\Property(property="role", type="string", enum={"admin","manager","employee","client"})
-     *         )
-     *     ),
-     *
-     *     @OA\Response(response=200, description="User updated successfully")
-     * )
-     */
     public function update(Request $request, User $user): JsonResponse
     {
         $validator = Validator::make($request->all(), [

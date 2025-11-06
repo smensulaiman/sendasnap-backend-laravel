@@ -3,7 +3,7 @@
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\ProfileController;
 use App\Http\Controllers\Api\V1\TaskController;
-use App\Http\Controllers\Api\V1\UserController;
+use App\Http\Controllers\Api\V1\MembersController;
 use App\Http\Controllers\Api\V1\VehicleController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -27,7 +27,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::prefix('v1')->group(function () {
 
     // Authentication Routes
-    Route::prefix('auth')->group(function () {
+    Route::prefix('auth')->middleware('auth:sanctum')->group(function () {
         Route::post('register', [AuthController::class, 'register']);
         Route::post('login', [AuthController::class, 'login']);
         Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
@@ -45,23 +45,20 @@ Route::prefix('v1')->group(function () {
         // Managers: limited capabilities (define BEFORE admin to avoid route shadowing)
         Route::middleware('role:manager')->group(function () {
             // Managers can index and show users, update limited fields, and create employees
-            Route::get('users', [UserController::class, 'index']);
-            Route::get('users/{user}', [UserController::class, 'show']);
-            Route::put('users/{user}', [UserController::class, 'update']);
-            Route::post('employees', [UserController::class, 'storeEmployee']);
+            Route::get('users', [MembersController::class, 'index']);
+            Route::get('users/{user}', [MembersController::class, 'show']);
+            Route::put('users/{user}', [MembersController::class, 'update']);
+            Route::post('employees', [MembersController::class, 'storeEmployee']);
         });
         // User Management Routes - Admin full CRUD
         Route::middleware('role:admin')->group(function () {
-            Route::apiResource('users', UserController::class);
-            Route::post('users/{user}/assign-role', [UserController::class, 'assignRole']);
+            Route::apiResource('users', MembersController::class);
+            Route::post('users/{user}/assign-role', [MembersController::class, 'assignRole']);
         });
 
         // Vehicle Management Routes
         Route::get('vehicles/search', [VehicleController::class, 'search']);
-        Route::get('vehicles/stats', [VehicleController::class, 'stats']);
-        Route::apiResource('vehicles', VehicleController::class);
-        Route::post('vehicles/{vehicle}/photos', [VehicleController::class, 'uploadPhoto']);
-        Route::delete('vehicles/{vehicle}/photos/{photo}', [VehicleController::class, 'deletePhoto']);
+
 
         // Task Management Routes
         Route::apiResource('tasks', TaskController::class);
@@ -78,7 +75,6 @@ Route::prefix('v1')->group(function () {
             Route::put('/', [ProfileController::class, 'update']);
             Route::post('avatar', [ProfileController::class, 'uploadAvatar']);
             Route::delete('avatar', [ProfileController::class, 'removeAvatar']);
-            Route::post('change-password', [ProfileController::class, 'changePassword']);
             Route::get('task-stats', [ProfileController::class, 'taskStats']);
         });
     });

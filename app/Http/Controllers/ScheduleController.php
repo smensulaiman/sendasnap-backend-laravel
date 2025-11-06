@@ -6,6 +6,7 @@ use App\Models\Task;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Ramsey\Uuid\Math\RoundingMode;
 
 class ScheduleController extends Controller
 {
@@ -173,7 +174,7 @@ class ScheduleController extends Controller
                 'urgent' => $query->clone()->where('priority', 'urgent')->count(),
             ],
             'completion_rate' => $query->count() > 0
-                ? round(($query->clone()->where('status', 'completed')->count() / $query->count()) * 100, 2)
+                ? round(($query->clone()->where('status', 'completed')->count() / $query->count()) * 100, 2, RoundingMode::FLOOR)
                 : 0,
         ];
 

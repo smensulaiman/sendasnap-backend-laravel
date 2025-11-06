@@ -9,12 +9,12 @@ use Illuminate\Routing\Controller as BaseController;
 
 /**
  * @OA\Info(
- *     title="SendaSnap API",
- *     version="1.0.0",
+ *     title="Senda Snap API - Laravel",
+ *     version="1.0",
  *     description="Vehicle photo upload and workflow management system",
  *
  *     @OA\Contact(
- *         email="admin@sendasnap.com"
+ *         email="sulaiman@sendajapan.com"
  *     )
  * )
  *

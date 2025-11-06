@@ -225,52 +225,6 @@ class ProfileController extends Controller
     }
 
     /**
-     * @OA\Post(
-     *     path="/api/v1/profile/change-password",
-     *     summary="Change password",
-     *     description="Change the authenticated user's password",
-     *     tags={"Profile"},
-     *     security={{"sanctum":{}}},
-     *
-     *     @OA\RequestBody(
-     *         required=true,
-     *
-     *         @OA\JsonContent(
-     *             required={"current_password","password","password_confirmation"},
-     *
-     *             @OA\Property(property="current_password", type="string", format="password"),
-     *             @OA\Property(property="password", type="string", format="password"),
-     *             @OA\Property(property="password_confirmation", type="string", format="password")
-     *         )
-     *     ),
-     *
-     *     @OA\Response(response=200, description="Password changed successfully")
-     * )
-     */
-    public function changePassword(Request $request): JsonResponse
-    {
-        $request->validate([
-            'current_password' => 'required',
-            'password' => 'required|string|min:8|confirmed',
-        ]);
-
-        $user = auth()->user();
-
-        // Verify current password
-        if (! Hash::check($request->current_password, $user->password)) {
-            return $this->errorResponse('Current password is incorrect', [
-                'current_password' => ['The current password is incorrect.'],
-            ], 422);
-        }
-
-        $user->update([
-            'password' => Hash::make($request->password),
-        ]);
-
-        return $this->successResponse('Password changed successfully');
-    }
-
-    /**
      * @OA\Get(
      *     path="/api/v1/profile/task-stats",
      *     summary="Get task statistics",
