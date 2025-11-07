@@ -9,6 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Throwable;
 
 /**
  * @OA\Tag(
@@ -167,8 +168,8 @@ class VehicleController extends Controller
 
         try {
             $results = $service->getVehicleDetails(
-                (string) $input['search_type'],
-                (string) $input['search_query']
+                (string)$input['search_type'],
+                (string)$input['search_query']
             );
 
             Log::info('Vehicle Search API Success', [
@@ -275,30 +276,6 @@ class VehicleController extends Controller
      *                     property="vehicle",
      *                     type="object",
      *                     @OA\Property(property="vehicle_id", type="integer", example=251144),
-     *                     @OA\Property(property="make", type="string", example="TOYOTA"),
-     *                     @OA\Property(property="model", type="string", example="COROLLA AXIO"),
-     *                     @OA\Property(property="chassis_model", type="string", example="NKE165"),
-     *                     @OA\Property(property="chassis_number", type="string", example="7250165"),
-     *                     @OA\Property(property="veh_cc", type="string", example="1490"),
-     *                     @OA\Property(property="veh_year", type="string", example="2021"),
-     *                     @OA\Property(property="veh_color", type="string", example="SILVER"),
-     *                     @OA\Property(property="veh_buy_date", type="string", format="date", example="2025-10-09"),
-     *                     @OA\Property(property="veh_auc_ship_number", type="string", example="2204"),
-     *                     @OA\Property(property="veh_net_weight", type="string", example="1140"),
-     *                     @OA\Property(property="veh_m3", type="string", nullable=true, example=null),
-     *                     @OA\Property(property="veh_l", type="string", example="440"),
-     *                     @OA\Property(property="veh_h", type="string", example="146"),
-     *                     @OA\Property(property="veh_w", type="string", example="169"),
-     *                     @OA\Property(property="veh_n1", type="string", example="名古屋"),
-     *                     @OA\Property(property="veh_n2", type="string", example="508"),
-     *                     @OA\Property(property="veh_n3", type="string", example="さ"),
-     *                     @OA\Property(property="veh_n4", type="string", example="1410"),
-     *                     @OA\Property(property="veh_buy_price", type="integer", example=1292000),
-     *                     @OA\Property(property="yard_date_in", type="string", format="date", example="0000-00-00"),
-     *                     @OA\Property(property="rikso_from_place_id", type="integer", example=165),
-     *                     @OA\Property(property="rikso_to_place_id", type="integer", example=215),
-     *                     @OA\Property(property="rikso_cost", type="integer", example=5000),
-     *                     @OA\Property(property="rikso_company", type="string", example="EIKO SHOUN"),
      *                     @OA\Property(
      *                         property="images",
      *                         type="array",
@@ -349,13 +326,10 @@ class VehicleController extends Controller
         }
 
         $user = $request->user();
-        $userAgent = $request->userAgent() ?? '';
-        $isAndroid = stripos($userAgent, 'Android') !== false;
 
         Log::info('Vehicle Image Upload API Request', [
             'user_id' => $user?->id,
             'user_email' => $user?->email,
-            'is_android' => $isAndroid,
             'vehicle_id' => $request->vehicle_id,
             'images_count' => count($request->file('images', [])),
         ]);
@@ -363,49 +337,34 @@ class VehicleController extends Controller
         $service = new ExternalVehicleService;
 
         try {
-            // Get vehicle details
-            $results = $service->getVehicleDetails('vehicle_id', (string) $request->vehicle_id);
+            $results = $service->getVehicleDetails('vehicle_id', (string)$request->vehicle_id);
 
             if (empty($results)) {
                 return $this->errorResponse('Vehicle not found', [], 404);
             }
 
-            $vehicle = $results[0]; // Get first vehicle (should be only one)
+            $vehicle = $results[0];
 
-            // Generate dummy URLs for uploaded images
             $uploadedImages = [];
             $uploadedFiles = $request->file('images', []);
 
             foreach ($uploadedFiles as $index => $file) {
-                // Dummy path structure - ready for actual storage implementation
                 $dummyFileName = 'uploaded_' . $request->vehicle_id . '_' . time() . '_' . ($index + 1) . '.' . $file->getClientOriginalExtension();
                 $dummyUrl = 'https://senda.us/autocraft/avisnew/images/veh_images/uploaded/' . $dummyFileName;
                 $uploadedImages[] = $dummyUrl;
-
-                // TODO: Implement actual file storage here
-                // Example: $file->store('vehicles/' . $request->vehicle_id, 'public');
-                // Then generate actual URL: Storage::url('vehicles/' . $request->vehicle_id . '/' . $fileName);
             }
 
-            // Merge existing images with newly uploaded ones
             $existingImages = $vehicle['images'] ?? [];
             $vehicle['images'] = array_merge($existingImages, $uploadedImages);
-
-            Log::info('Vehicle Image Upload API Success', [
-                'user_id' => $user?->id,
-                'is_android' => $isAndroid,
-                'vehicle_id' => $request->vehicle_id,
-                'uploaded_images_count' => count($uploadedImages),
-                'total_images_count' => count($vehicle['images']),
-            ]);
 
             return $this->successResponse('Images uploaded successfully', [
                 'vehicle' => $vehicle,
             ]);
+
         } catch (QueryException $e) {
+
             Log::error('Vehicle Image Upload API - Database Query Error', [
                 'user_id' => $user?->id,
-                'is_android' => $isAndroid,
                 'error' => $e->getMessage(),
                 'vehicle_id' => $request->vehicle_id,
             ]);
@@ -413,10 +372,11 @@ class VehicleController extends Controller
             return $this->errorResponse('External database query failed', [
                 'error' => $e->getMessage(),
             ], 502);
-        } catch (\Throwable $e) {
+
+        } catch (Throwable $e) {
+
             Log::error('Vehicle Image Upload API - General Error', [
                 'user_id' => $user?->id,
-                'is_android' => $isAndroid,
                 'error' => $e->getMessage(),
                 'exception' => get_class($e),
                 'vehicle_id' => $request->vehicle_id,
