@@ -371,6 +371,10 @@
                                                                 "type": "string",
                                                                 "example": "12312"
                                                             },
+                                                            "avatar": {
+                                                                "type": "string",
+                                                                "example": "photo url"
+                                                            },
                                                             "created_at": {
                                                                 "type": "string",
                                                                 "format": "date-time",
@@ -446,7 +450,7 @@
                 "tags": [
                     "Vehicles"
                 ],
-                "summary": "Search vehicles (senda.us avis_03_oct table)",
+                "summary": "Search vehicles (avis_03_oct table)",
                 "description": "Searches external vehicle database using header inputs",
                 "operationId": "e62ddf990d7c6b316edddc67b5a7fe0d",
                 "parameters": [
@@ -475,7 +479,374 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Search completed"
+                        "description": "Search completed",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "success",
+                                        "message",
+                                        "data",
+                                        "meta"
+                                    ],
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Search completed"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "vehicles": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "vehicle_id": {
+                                                                "type": "integer",
+                                                                "example": 251144
+                                                            },
+                                                            "make": {
+                                                                "type": "string",
+                                                                "example": "TOYOTA"
+                                                            },
+                                                            "model": {
+                                                                "type": "string",
+                                                                "example": "COROLLA AXIO"
+                                                            },
+                                                            "chassis_model": {
+                                                                "type": "string",
+                                                                "example": "NKE165"
+                                                            },
+                                                            "chassis_number": {
+                                                                "type": "string",
+                                                                "example": "7250165"
+                                                            },
+                                                            "veh_cc": {
+                                                                "type": "string",
+                                                                "example": "1490"
+                                                            },
+                                                            "veh_year": {
+                                                                "type": "string",
+                                                                "example": "2021"
+                                                            },
+                                                            "veh_color": {
+                                                                "type": "string",
+                                                                "example": "SILVER"
+                                                            },
+                                                            "veh_buy_date": {
+                                                                "type": "string",
+                                                                "format": "date",
+                                                                "example": "2025-10-09"
+                                                            },
+                                                            "veh_auc_ship_number": {
+                                                                "type": "string",
+                                                                "example": "2204"
+                                                            },
+                                                            "veh_net_weight": {
+                                                                "type": "string",
+                                                                "example": "1140"
+                                                            },
+                                                            "veh_m3": {
+                                                                "type": "string",
+                                                                "example": null,
+                                                                "nullable": true
+                                                            },
+                                                            "veh_l": {
+                                                                "type": "string",
+                                                                "example": "440"
+                                                            },
+                                                            "veh_h": {
+                                                                "type": "string",
+                                                                "example": "146"
+                                                            },
+                                                            "veh_w": {
+                                                                "type": "string",
+                                                                "example": "169"
+                                                            },
+                                                            "veh_n1": {
+                                                                "type": "string",
+                                                                "example": "名古屋"
+                                                            },
+                                                            "veh_n2": {
+                                                                "type": "string",
+                                                                "example": "508"
+                                                            },
+                                                            "veh_n3": {
+                                                                "type": "string",
+                                                                "example": "さ"
+                                                            },
+                                                            "veh_n4": {
+                                                                "type": "string",
+                                                                "example": "1410"
+                                                            },
+                                                            "veh_buy_price": {
+                                                                "type": "integer",
+                                                                "example": 1292000
+                                                            },
+                                                            "yard_date_in": {
+                                                                "type": "string",
+                                                                "format": "date",
+                                                                "example": "0000-00-00"
+                                                            },
+                                                            "rikso_from_place_id": {
+                                                                "type": "integer",
+                                                                "example": 165
+                                                            },
+                                                            "rikso_to_place_id": {
+                                                                "type": "integer",
+                                                                "example": 215
+                                                            },
+                                                            "rikso_cost": {
+                                                                "type": "integer",
+                                                                "example": 5000
+                                                            },
+                                                            "rikso_company": {
+                                                                "type": "string",
+                                                                "example": "EIKO SHOUN"
+                                                            },
+                                                            "images": {
+                                                                "type": "array",
+                                                                "items": {
+                                                                    "type": "string",
+                                                                    "format": "uri",
+                                                                    "example": "https://senda.us/autocraft/avisnew/images/veh_images/img_01760044939.png"
+                                                                }
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "meta": {
+                                            "properties": {
+                                                "timestamp": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-11-07T01:58:04.676067Z"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/vehicles/upload-images": {
+            "post": {
+                "tags": [
+                    "Vehicles"
+                ],
+                "summary": "Upload vehicle images",
+                "description": "Uploads images for a vehicle. Images are not stored yet, but the structure is ready for implementation.",
+                "operationId": "f6cd8e939cca05a6733f0def9c1c89f9",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "vehicle_id",
+                                    "images"
+                                ],
+                                "properties": {
+                                    "vehicle_id": {
+                                        "description": "The vehicle ID",
+                                        "type": "integer",
+                                        "example": 251144
+                                    },
+                                    "images[]": {
+                                        "description": "Array of image files",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "binary"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Images uploaded successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "success",
+                                        "message",
+                                        "data",
+                                        "meta"
+                                    ],
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Images uploaded successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "vehicle": {
+                                                    "properties": {
+                                                        "vehicle_id": {
+                                                            "type": "integer",
+                                                            "example": 251144
+                                                        },
+                                                        "make": {
+                                                            "type": "string",
+                                                            "example": "TOYOTA"
+                                                        },
+                                                        "model": {
+                                                            "type": "string",
+                                                            "example": "COROLLA AXIO"
+                                                        },
+                                                        "chassis_model": {
+                                                            "type": "string",
+                                                            "example": "NKE165"
+                                                        },
+                                                        "chassis_number": {
+                                                            "type": "string",
+                                                            "example": "7250165"
+                                                        },
+                                                        "veh_cc": {
+                                                            "type": "string",
+                                                            "example": "1490"
+                                                        },
+                                                        "veh_year": {
+                                                            "type": "string",
+                                                            "example": "2021"
+                                                        },
+                                                        "veh_color": {
+                                                            "type": "string",
+                                                            "example": "SILVER"
+                                                        },
+                                                        "veh_buy_date": {
+                                                            "type": "string",
+                                                            "format": "date",
+                                                            "example": "2025-10-09"
+                                                        },
+                                                        "veh_auc_ship_number": {
+                                                            "type": "string",
+                                                            "example": "2204"
+                                                        },
+                                                        "veh_net_weight": {
+                                                            "type": "string",
+                                                            "example": "1140"
+                                                        },
+                                                        "veh_m3": {
+                                                            "type": "string",
+                                                            "example": null,
+                                                            "nullable": true
+                                                        },
+                                                        "veh_l": {
+                                                            "type": "string",
+                                                            "example": "440"
+                                                        },
+                                                        "veh_h": {
+                                                            "type": "string",
+                                                            "example": "146"
+                                                        },
+                                                        "veh_w": {
+                                                            "type": "string",
+                                                            "example": "169"
+                                                        },
+                                                        "veh_n1": {
+                                                            "type": "string",
+                                                            "example": "名古屋"
+                                                        },
+                                                        "veh_n2": {
+                                                            "type": "string",
+                                                            "example": "508"
+                                                        },
+                                                        "veh_n3": {
+                                                            "type": "string",
+                                                            "example": "さ"
+                                                        },
+                                                        "veh_n4": {
+                                                            "type": "string",
+                                                            "example": "1410"
+                                                        },
+                                                        "veh_buy_price": {
+                                                            "type": "integer",
+                                                            "example": 1292000
+                                                        },
+                                                        "yard_date_in": {
+                                                            "type": "string",
+                                                            "format": "date",
+                                                            "example": "0000-00-00"
+                                                        },
+                                                        "rikso_from_place_id": {
+                                                            "type": "integer",
+                                                            "example": 165
+                                                        },
+                                                        "rikso_to_place_id": {
+                                                            "type": "integer",
+                                                            "example": 215
+                                                        },
+                                                        "rikso_cost": {
+                                                            "type": "integer",
+                                                            "example": 5000
+                                                        },
+                                                        "rikso_company": {
+                                                            "type": "string",
+                                                            "example": "EIKO SHOUN"
+                                                        },
+                                                        "images": {
+                                                            "description": "Array of image URLs including newly uploaded ones",
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "string",
+                                                                "format": "uri",
+                                                                "example": "https://senda.us/autocraft/avisnew/images/veh_images/img_01760044939.png"
+                                                            }
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "meta": {
+                                            "properties": {
+                                                "timestamp": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-11-07T01:58:04.676067Z"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "404": {
+                        "description": "Vehicle not found"
                     }
                 },
                 "security": [

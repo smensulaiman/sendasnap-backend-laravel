@@ -2,12 +2,24 @@
 
 namespace App\Services;
 
+use Illuminate\Database\Connection;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class ExternalVehicleService
 {
+    private ?Connection $connection = null;
+
+    private function getConnection(): Connection
+    {
+        if ($this->connection === null) {
+            $this->connection = DB::connection('external_mysql');
+        }
+
+        return $this->connection;
+    }
+
     private function buildWhereClause(string $searchType, string $searchQuery): array
     {
         $allowed = [
@@ -16,7 +28,7 @@ class ExternalVehicleService
         ];
 
         $key = strtolower($searchType);
-        if (! array_key_exists($key, $allowed)) {
+        if (!array_key_exists($key, $allowed)) {
             $key = 'veh_chassis_number';
         }
 
@@ -63,9 +75,23 @@ class ExternalVehicleService
             WHERE {$where}";
 
         try {
-            $rows = DB::connection('external_mysql')->select($sql, $bindings);
+            $connection = $this->getConnection();
+            $rows = $connection->select($sql, $bindings);
 
-            return array_map(fn ($r) => (array) $r, $rows);
+            $vehicles = array_map(fn($r) => (array) $r, $rows);
+
+            // Fetch images for each vehicle
+            foreach ($vehicles as &$vehicle) {
+                $vehicleId = $vehicle['vehicle_id'] ?? null;
+                if ($vehicleId) {
+                    $images = $connection->select('SELECT veh_image FROM tbl_vehicle_images WHERE vehicle_id = ?', [$vehicleId]);
+                    $vehicle['images'] = array_map(fn($img) => 'https://senda.us/autocraft/avisnew/images/veh_images/' . $img->veh_image, $images);
+                } else {
+                    $vehicle['images'] = [];
+                }
+            }
+
+            return $vehicles;
         } catch (QueryException $e) {
             Log::error('ExternalVehicleService query failed', [
                 'message' => $e->getMessage(),
