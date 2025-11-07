@@ -47,6 +47,7 @@ Route::prefix('v1')->group(function () {
 
         // Vehicle Management Routes
         Route::get('vehicles/search', [VehicleController::class, 'search']);
+        Route::post('vehicles/upload-images', [VehicleController::class, 'uploadImages']);
 
         // Task Management Routes
         Route::apiResource('tasks', TaskController::class);
